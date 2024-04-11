@@ -4,8 +4,10 @@ from sql.enums import CONNECT_DB_TYPE
 from sql.CSQL import NotConnectToDB, ErrorSQLQuery, ErrorSQLData
 
 from sql.CSQLAgent import CSqlAgent
+from sql.sql_data import PLAN_TABLE_FIELDS, SQL_TABLE_NAME
 
 from log.Clog import Clog
+
 
 class CData:
     def __init__(self, country_name: str):
@@ -16,10 +18,7 @@ class CData:
         self.current_line_id = LINE_ID.LINE_NONE  # Текущая линия
         self.total_smena_delay = 0  # Дневная смена в часах
 
-
     def get_data_for_line(self, line_id: LINE_ID):
-
-        self.current_line_id = line_id
 
         sql_line_id = CCommon.get_line_id_for_sql(line_id)
         if sql_line_id:
@@ -31,14 +30,31 @@ class CData:
                 Clog.lprint(f"Подключение к БД: CONNECT_DB_TYPE.LOCAL [sql_handle: {sql_handle}]")
                 if result:
 
-                    query_string = (f"SELECT veh_id FROM {sql_table_vehicles} "
-                                    f"WHERE veh_id = %s "
+                    query_string = (f"SELECT {PLAN_TABLE_FIELDS.fd_change_date}, "
+                                    f"{PLAN_TABLE_FIELDS.fd_plan_current}, "
+                                    f"{PLAN_TABLE_FIELDS.fd_time_hours_on_smena}"
+                                    f" FROM {SQL_TABLE_NAME.local_db_plan_table} "
+                                    f"WHERE {PLAN_TABLE_FIELDS.fd_line_id} = %s "
                                     f"LIMIT 1")
 
-                    curs = connect_handle.cursor()
-                    curs.execute(query_string, [vehicle_id])
+                    result = local_sql.sql_query_and_get_result(
+                        sql_handle, query_string, (sql_line_id,), "_1", )  # Запрос типа аасоциативного массива
+                    if result is False:  # Errorrrrrrrrrrrrr based data
+                        return False
+                    # print(result)
 
+                    sql_line_check = result[0].get(PLAN_TABLE_FIELDS.fd_line_id, None)
+                    if sql_line_check is None:
+                        return False
 
+                    self.current_line_id = line_id
+
+                    self.last_change_data = result[0].get(PLAN_TABLE_FIELDS.fd_change_date, None)
+                    self.total_day_plane = result[0].get(PLAN_TABLE_FIELDS.fd_plan_current, 1200)
+                    self.total_smena_delay = result[0].get(PLAN_TABLE_FIELDS.fd_time_hours_on_smena, 0)
+
+                    Clog.lprint(f"CData -> get_data_for_line ->  Данные получены!")
+                    return True
 
             except NotConnectToDB as err:
                 Clog.lprint(f"Внимание! Ошибка SQL: NotConnectToDB [{err}]")
@@ -52,3 +68,11 @@ class CData:
             finally:
                 Clog.lprint(f"Отключение от БД: CONNECT_DB_TYPE.LOCAL [sql_handle: {local_sql.get_sql_handle()}]")
                 local_sql.disconnect_from_db()
+
+
+
+
+
+# unit = CData("Russia")
+#
+# unit.get_data_for_line(LINE_ID.LINE_VRN_ONE)

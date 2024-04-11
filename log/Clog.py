@@ -4,7 +4,7 @@ class Clog:
     def __init__(self):
         pass
 
-    @staticmethod
-    def lprint(text: str):
-        if Clog.__log_enable:
+    @classmethod
+    def lprint(cls, text: str):
+        if cls.__log_enable:
             print(text)

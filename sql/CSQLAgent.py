@@ -1,7 +1,6 @@
 from sql.CSQL import csql_eng, ErrorSQLData, ErrorSQLQuery, NotConnectToDB
 import sql.enums as cenum
 from sql.config import db_standart_connect_params, db_assembly_connect_params
-from sql.sql_data import SQL_TABLE_NAME, SQL_USERS_FIELDS
 
 
 class CSqlAgent(csql_eng):

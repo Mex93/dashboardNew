@@ -12,9 +12,9 @@ class SQL_TABLE_NAME:
 class PLAN_TABLE_FIELDS:
     fd_line_id = "line_id"
     fd_plan_current = "plan_current"
-    fd_change_date = "change_date"
+    fd_change_date = "last_change_date"
     fd_change_user_id = "change_user_id"
-    fd_primary_key = "change_user_id"
+    fd_primary_key = "auto_idx"
 
     # Время старта перерывов в часах:минутах
     # Хранится просто в строке
