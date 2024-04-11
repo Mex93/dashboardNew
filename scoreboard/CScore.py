@@ -1,3 +1,5 @@
+from scoreboard.enums import JOB_TYPE, JOB_STATUS
+
 class CSore:
     def __init__(self):
         # Основное с вывода табло
@@ -7,15 +9,15 @@ class CSore:
         self.total_day_plan_speed = 0  # Расчётная скорость телеков в час относительно дневного плана (Меняыется только со сменой плана)
         # справа табло
         self.assembled_device = 0  # Собранных на текущий момент
-        self.assembled_device_speed = 0 # Скорость в час относительно собранных по факту
+        self.assembled_device_speed = 0  # Скорость в час относительно собранных по факту
 
         # футер
         self.assembled_speed_for_last_five_mins = 0  # Собрано за последние 5 минут
         self.assembled_speed_for_last_one_hour = 0  # Собрано за последний час
         self.assembled_forecast_for_day = 0  # Прогноз за день
 
-        self.line_stats_job = 0
-
+        self.current_job_time = JOB_TYPE.NONE  # Тип рабочего времени - день и ночь
+        self.current_job_status = JOB_STATUS.NONE  # Статус работы - закончена, идёт, перерыв итд
 
 
     def reload_data(self):
