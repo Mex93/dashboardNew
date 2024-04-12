@@ -2,7 +2,6 @@ import psycopg2.extras
 import sql.enums as cenum
 
 
-
 class NotConnectToDB(Exception):
     def __init__(self, m):
         self.message = m
@@ -156,7 +155,7 @@ class csql_eng:
 
     """ SQL движжж """
 
-    def sql_connect(self, ctimezone: str) -> bool | object:
+    def sql_connect(self, time_zone: cenum.TIME_ZONES) -> bool | object:
 
         if self.is_valid_saved_connect_data() is False:
             return True
@@ -175,7 +174,7 @@ class csql_eng:
 
             cur = connect_handle.cursor()
 
-            if ctimezone == "0300":
+            if time_zone == cenum.TIME_ZONES.RUSSIA:
                 cur.execute("SET TIME ZONE 'Europe/Moscow'")
             else:
                 cur.execute("SET TIME ZONE 'Asia/Almaty'")

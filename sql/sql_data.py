@@ -52,3 +52,12 @@ class PLAN_TABLE_FIELDS:
 
     fd_mena_start_job_date_stamp = "smena_start_job_date"
     fd_smena_start_job_type = "smena_start_job_type"
+
+
+class ASSEMBLED_TABLE_FIELDS:
+    fd_assy_id = "assy_id"
+    fd_tvfk = "tv_fk"
+    fd_linefk = "line_fk"  # Линия вторичный ключ
+    fd_tv_sn = "tv_sn"  # Линия вторичный ключ
+    fd_completed_date = "timestamp_st100"  # Дата прохождения черезе упаковку
+

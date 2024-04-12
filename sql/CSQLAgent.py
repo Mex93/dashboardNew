@@ -4,18 +4,14 @@ from sql.config import db_standart_connect_params, db_assembly_connect_params
 
 
 class CSqlAgent(csql_eng):
-    def __init__(self, program_type: str):
+    def __init__(self, time_zone: cenum.TIME_ZONES):
         super().__init__()
 
         self.__connect_handle = False
-        self.__sql_object = None
 
         self.__sql_data_line = db_assembly_connect_params
         self.__sql_data_local = db_standart_connect_params
-        if program_type == "Russia":
-            self.__sql_time = "0300"
-        else:
-            self.__sql_time = "0600"
+        self.__time_zone = time_zone
 
     def get_sql_handle(self):
         return self.__connect_handle
@@ -32,20 +28,18 @@ class CSqlAgent(csql_eng):
             if self.is_valid_saved_connect_data() is False:  # Saved in config data is NOT correct
                 raise ErrorSQLData("Error SQL | incomming connections data!")
 
-            connect_handle = self.sql_connect(self.__sql_time)
+            connect_handle = self.sql_connect(self.__time_zone)
             if connect_handle is False:  # Connecting not successful
                 raise NotConnectToDB("Error SQL | db not connect!")
 
             self.__connect_handle = connect_handle
-            self.__sql_object = self
             return True
 
         return False
 
     def disconnect_from_db(self) -> bool:
         if self.__connect_handle is not False:
-            self.__sql_object.sql_disconnect()
+            self.sql_disconnect()
             self.__connect_handle = False
-            self.__sql_object = None
             return True
         return False

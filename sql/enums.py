@@ -14,3 +14,9 @@ class CONNECT_DB_TYPE(IntEnum):
     NONE = auto(),
     LOCAL = auto(),
     LINE = auto()
+
+
+class TIME_ZONES(IntEnum):
+    NONE = 0,
+    RUSSIA = 1,
+    KZ = 2,
