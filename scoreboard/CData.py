@@ -1,7 +1,8 @@
 from datetime import datetime
 from datetime import timedelta
+from typing import List
 
-from scoreboard.enums import LINE_ID
+from scoreboard.enums import LINE_ID, BREAK_TYPE, JOB_TIME, JOB_BREAK_ARRAY_DATA
 from common import CCommon
 from sql.enums import CONNECT_DB_TYPE, TIME_ZONES
 from sql.CSQL import NotConnectToDB, ErrorSQLQuery, ErrorSQLData
@@ -159,7 +160,7 @@ class CData:
 
         return 0
 
-    def get_break_start_time(self, br_type: BREAK_TYPE, job_time: JOB_TYPE):
+    def get_break_start_string_time(self, br_type: BREAK_TYPE, job_time: JOB_TYPE) -> int | str:
         """
         Returnet time in sec
         :param br_type:
@@ -199,7 +200,7 @@ class CData:
 
         return count
 
-    def get_current_break_time(self, job_time: JOB_TYPE):
+    def get_current_break_time(self, job_time: JOB_TYPE) -> list[int | int] | BREAK_TYPE:
 
         cdate = datetime.now()
 
@@ -218,6 +219,9 @@ class CData:
         elif job_time == JOB_TYPE.NIGHT:
             buffer_list = self.break_time_night
 
+        if buffer_list is None:
+            return BREAK_TYPE.NONE
+
         current_unix_time = CCommon.get_current_unix_time(cdate)
         for break_arr in buffer_list:
             start_time = break_arr[BREAK_ARRAY_DATA.START_TIME]
@@ -231,13 +235,162 @@ class CData:
 
                     # print(break_start_time_unix_time, current_unix_time, end_time)
                     if break_start_time_unix_time <= current_unix_time <= end_time:
-                        return break_arr[BREAK_ARRAY_DATA.BREAK_TYPE]
+
+                        time_for_end = end_time - current_unix_time
+                        if time_for_end < 0:
+                            time_for_end = 0
+
+                        return [break_arr[BREAK_ARRAY_DATA.BREAK_TYPE], time_for_end]
 
         return BREAK_TYPE.NONE
 
+    def get_day_total_plane(self):
+        return int(self.total_day_plane)
+
+    def get_day_plane_total_speed_for_hour(self, job_time: JOB_TYPE):
+        plane = self.total_day_plane
+
+        all_job_time = self.get_all_job_time(job_time)
+        speed = 0
+
+        if all_job_time > 0:
+            speed = plane / (all_job_time / 3600)
+
+        return int(speed)
+
+    def get_all_job_time(self, job_time: JOB_TYPE):
+        buff = 12 * 3600
+        all_delays = self.get_all_breaks_delay_time(job_time)
+        buff -= all_delays
+        if buff < 0:
+            buff = 0
+
+        return buff  # результат в секундах
+
+    @classmethod
+    def get_job_time_unix_time(cls, job_type: JOB_TIME, job_time: JOB_TYPE):
+
+        cdate = datetime.now()
+
+        mins = cdate.minute
+        hours = cdate.hour
+        seconds = cdate.second
+        #
+        day = cdate.day
+        month = cdate.month
+        year = cdate.year
+
+        start_date = None
+        if job_type == JOB_TIME.START:
+            if job_time == JOB_TYPE.NIGHT:
+                start_date = cdate.strptime(f"{year}/{month}/{day} 20:00/00", "%Y/%m/%d %H:%M/%S")
+
+            elif job_time == JOB_TYPE.DAY:
+                start_date = cdate.strptime(f"{year}/{month}/{day} 08:00/00", "%Y/%m/%d %H:%M/%S")
+
+        elif job_type == JOB_TIME.END:
+            if job_time == JOB_TYPE.NIGHT:
+                start_date = cdate.strptime(f"{year}/{month}/{day} 08:00/00", "%Y/%m/%d %H:%M/%S")
+
+            elif job_time == JOB_TYPE.DAY:
+                start_date = cdate.strptime(f"{year}/{month}/{day} 20:00/00", "%Y/%m/%d %H:%M/%S")
+        if start_date is None:
+            Clog.lprint(
+                f"Ошибка!!! get_job_time_unix_time -> start_date -> None")
+            return
+        start_job_time = int(start_date.timestamp())
+        if start_job_time < 0:
+            start_job_time = 0
+
+        return int(start_job_time)
+
+    def get_break_unit_time(self, break_type: BREAK_TYPE, job_time: JOB_TYPE) -> bool | list:
+        """Возврат времени unix time старта и конца перерыва"""
+        string = self.get_break_start_string_time(break_type, job_time)
+        if isinstance(string, str):
+
+            cdate = datetime.now()
+
+            mins = cdate.minute
+            hours = cdate.hour
+            seconds = cdate.second
+            #
+            day = cdate.day
+            month = cdate.month
+            year = cdate.year
+
+            start_date = int(cdate.strptime(f"{year}/{month}/{day} {string}/00", "%Y/%m/%d %H:%M/%S").timestamp())
+            if start_date < 0:
+                start_date = 0
+
+            delay = self.get_break_delay_time(break_type, job_time)
+            start_date = [start_date, start_date + delay, delay]
+            return start_date
+
+        return False
+
+    def get_compensace_start_to_now_time(self, job_time: JOB_TYPE) -> list[int]:
+        """ Вычисляет компенсацию времени перерывов отнимая её от времени старта смены
+        до текущей или от конца смены до текущей"""
+
+        current_unix_time = CCommon.get_current_unix_time()
+
+        breaks = [BREAK_TYPE.FIRST,
+                  BREAK_TYPE.EAT,
+                  BREAK_TYPE.DOUBLE,
+                  BREAK_TYPE.LAST
+                  ]
+
+        time_job_start = self.get_job_time_unix_time(JOB_TIME.START, job_time)  # unix time
+        start_to_now_sc = current_unix_time - time_job_start
+        if start_to_now_sc < 0:
+            start_to_now_sc = 0
+
+        time_job_end = self.get_job_time_unix_time(JOB_TIME.END, job_time)  # unix time
+        time_to_end_smena_sc = time_job_end - current_unix_time
+        if time_to_end_smena_sc < 0:
+            time_to_end_smena_sc = 0
+
+        for br_type in breaks:
+            br_params = self.get_break_unit_time(br_type, job_time)
+            if isinstance(br_params, list):
+
+                start = br_params[JOB_BREAK_ARRAY_DATA.START]
+                # end = br_params[JOB_BREAK_ARRAY_DATA.END]
+                delay = br_params[JOB_BREAK_ARRAY_DATA.DELAY]
+
+                # start to now
+                if current_unix_time > start:
+                    start_to_now_sc -= delay
+                # now to end
+                if current_unix_time < start:
+                    time_to_end_smena_sc -= delay
+
+        return [start_to_now_sc, time_to_end_smena_sc]
+
+    def get_break_last_time(self, break_type: BREAK_TYPE, job_time: JOB_TYPE) -> bool | int:
+        """ Отсчёт времени перерыва = сколько осталось секунд """
+        if break_type is not BREAK_TYPE.NONE:
+            br_params = self.get_break_unit_time(break_type, job_time)
+            if isinstance(br_params, list):
+
+                current_unix_time = CCommon.get_current_unix_time()
+
+                start = br_params[JOB_BREAK_ARRAY_DATA.START]
+                end = br_params[JOB_BREAK_ARRAY_DATA.END]
+                # delay = br_params[JOB_BREAK_ARRAY_DATA.DELAY]
+
+                if start <= current_unix_time <= end:
+                    last = end - current_unix_time
+                    if last < 0:
+                        last = 0
+                    return last
+        return False
 
 
-unit = CData(TIME_ZONES.RUSSIA, LINE_ID.LINE_VRN_ONE)
-unit.get_data_for_line()
-# print(unit.get_current_break_time(JOB_TYPE.DAY))
 
+
+
+# unit = CData(TIME_ZONES.RUSSIA, LINE_ID.LINE_VRN_ONE)
+# unit.get_data_for_line()
+# # print(unit.get_current_break_time(JOB_TYPE.DAY))

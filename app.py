@@ -7,6 +7,10 @@ app.config['SECRET_KEY'] = '192b9bdd22ab9ed4d12e236c78afcb9a393ec15f71bbf5dc987d
 app.config['TESTING'] = True
 app.config['WTF_CSRF_ENABLED'] = True
 
+
+lines_config = list()
+
+
 @app.route('/logo.ico')
 def favicon():
     return url_for('static', filename='/static/img/logo.ico')
