@@ -51,7 +51,7 @@ class PLAN_TABLE_FIELDS:
     fd_time_night_job_end = "smena_night_time_end"
 
     fd_mena_start_job_date_stamp = "smena_start_job_date"
-    fd_smena_start_job_type = "smena_start_job_type"
+    fd_smena_start_job_type = "job_time_type"
 
 
 class ASSEMBLED_TABLE_FIELDS:

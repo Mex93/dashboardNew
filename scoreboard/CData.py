@@ -23,6 +23,7 @@ class CData:
         self.current_line_id = line_id  # Текущая линия
         self.total_smena_delay = 0  # Дневная смена в часах
 
+        self.current_job_type = JOB_TYPE.NONE  # Тип смены день ночь
         # список с перерывами
         self.break_time_night = tuple()
         # день
@@ -58,6 +59,13 @@ class CData:
                     self.total_day_plane = result[0].get(PLAN_TABLE_FIELDS.fd_plan_current, 1200)
                     self.total_smena_delay = result[0].get(PLAN_TABLE_FIELDS.fd_time_hours_on_smena, 0)
 
+                    # Старт и конец смены
+                    self.start_job_day = result[0].get(PLAN_TABLE_FIELDS.fd_time_day_job_start, None)
+                    self.end_job_day = result[0].get(PLAN_TABLE_FIELDS.fd_time_day_job_end, None)
+
+                    self.start_job_night = result[0].get(PLAN_TABLE_FIELDS.fd_time_night_job_start, None)
+                    self.end_job_night = result[0].get(PLAN_TABLE_FIELDS.fd_time_night_job_end, None)
+
                     # Время начала строка
                     break_day_one_start = result[0].get(PLAN_TABLE_FIELDS.fd_brake_first_time_day_start, None)
                     break_day_eat_start = result[0].get(PLAN_TABLE_FIELDS.fd_brake_eat_time_day_start, None)
@@ -80,7 +88,21 @@ class CData:
                     break_night_double_len = result[0].get(PLAN_TABLE_FIELDS.fd_brake_double_time_night_len, None)
                     break_night_third_len = result[0].get(PLAN_TABLE_FIELDS.fd_brake_third_time_night_len, None)
 
+                    # Тип смены день ночь
+                    # Меняется в бд для день или ночь
+                    # Если выставлен день то ночных смен нет и наоборот
+                    self.current_job_type = result[0].get(PLAN_TABLE_FIELDS.fd_smena_start_job_type, None)
+
                     check_list = (
+                        # старт смены и конец - строка
+                        self.start_job_day,
+                        self.end_job_day,
+                        self.start_job_night,
+                        self.end_job_night,
+
+                        # тип смены
+                        self.current_job_type,
+
                         self.last_change_data,
                         self.total_day_plane,
                         self.total_smena_delay,
@@ -267,8 +289,10 @@ class CData:
 
         return buff  # результат в секундах
 
-    @classmethod
-    def get_job_time_unix_time(cls, job_type: JOB_TIME, job_time: JOB_TYPE):
+    def get_job_time_type(self):
+        return self.current_job_type
+
+    def get_job_time_unix_time(self, job_type: JOB_TIME, job_time: JOB_TYPE):
 
         cdate = datetime.now()
 
@@ -283,17 +307,17 @@ class CData:
         start_date = None
         if job_type == JOB_TIME.START:
             if job_time == JOB_TYPE.NIGHT:
-                start_date = cdate.strptime(f"{year}/{month}/{day} 20:00/00", "%Y/%m/%d %H:%M/%S")
+                start_date = cdate.strptime(f"{year}/{month}/{day} {self.start_job_night}/00", "%Y/%m/%d %H:%M/%S")
 
             elif job_time == JOB_TYPE.DAY:
-                start_date = cdate.strptime(f"{year}/{month}/{day} 08:00/00", "%Y/%m/%d %H:%M/%S")
+                start_date = cdate.strptime(f"{year}/{month}/{day} {self.start_job_day}/00", "%Y/%m/%d %H:%M/%S")
 
         elif job_type == JOB_TIME.END:
             if job_time == JOB_TYPE.NIGHT:
-                start_date = cdate.strptime(f"{year}/{month}/{day} 08:00/00", "%Y/%m/%d %H:%M/%S")
+                start_date = cdate.strptime(f"{year}/{month}/{day} {self.start_job_day}/00", "%Y/%m/%d %H:%M/%S")
 
             elif job_time == JOB_TYPE.DAY:
-                start_date = cdate.strptime(f"{year}/{month}/{day} 20:00/00", "%Y/%m/%d %H:%M/%S")
+                start_date = cdate.strptime(f"{year}/{month}/{day} {self.start_job_night}/00", "%Y/%m/%d %H:%M/%S")
         if start_date is None:
             Clog.lprint(
                 f"Ошибка!!! get_job_time_unix_time -> start_date -> None")

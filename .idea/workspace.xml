@@ -6,13 +6,10 @@
   <component name="ChangeListManager">
     <list default="true" id="0763ca10-79a3-416a-88f1-f9ae49a0d658" name="Changes" comment="first">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scoreboard/CBreak.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/app.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/scoreboard/CData.py" beforeDir="false" afterPath="$PROJECT_DIR$/scoreboard/CData.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/scoreboard/CScore.py" beforeDir="false" afterPath="$PROJECT_DIR$/scoreboard/CScore.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/scoreboard/common.py" beforeDir="false" afterPath="$PROJECT_DIR$/scoreboard/common.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/sql/CSQL.py" beforeDir="false" afterPath="$PROJECT_DIR$/sql/CSQL.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/sql/CSQLAgent.py" beforeDir="false" afterPath="$PROJECT_DIR$/sql/CSQLAgent.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/sql/enums.py" beforeDir="false" afterPath="$PROJECT_DIR$/sql/enums.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/sql/sql_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/sql/sql_data.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -33,9 +30,9 @@
   <component name="MarkdownSettingsMigration">
     <option name="stateVersion" value="1" />
   </component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "associatedIndex": 2
-}]]></component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 2
+}</component>
   <component name="ProjectId" id="2ex0KXbMoYzwJPNdDYrDdN4hSnJ" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectViewState">
@@ -46,12 +43,16 @@
   "keyToString": {
     "Python.CData.executor": "Run",
     "Python.CScore.executor": "Run",
-    "Python.main.executor": "Debug",
+    "Python.app.executor": "Run",
+    "Python.config.executor": "Run",
+    "Python.dashboardNew.executor": "Run",
+    "Python.main.executor": "Run",
     "Python.sql_data.executor": "Run",
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "git-widget-placeholder": "master",
-    "last_opened_file_path": "C:/Users/Ryazanov/PycharmProjects/PalleteVehicleComplete"
+    "ignore.virus.scanning.warn.message": "true",
+    "last_opened_file_path": "C:/Users/Ryazanov/PycharmProjects/dashboardNew"
   }
 }]]></component>
   <component name="RecentsManager">
@@ -64,20 +65,21 @@
     </key>
   </component>
   <component name="RunManager">
-    <configuration name="main" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
+    <configuration name="CScore" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="dashboardNew" />
-      <option name="ENV_FILES" value="" />
+      <option name="ENV_FILES" value="$PROJECT_DIR$" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <envs>
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="SDK_NAME" value="Python 3.12 (dashboardNew)" />
+      <option name="WORKING_DIRECTORY" value="C:\Users\Ryazanov\PycharmProjects\dashboardNew" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/main.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/scoreboard/CScore.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -86,6 +88,53 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+    <configuration default="true" type="PythonConfigurationType" factoryName="Python">
+      <module name="dashboardNew" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="SDK_NAME" value="Python 3.12 (dashboardNew)" />
+      <option name="WORKING_DIRECTORY" value="C:\Users\Ryazanov\PycharmProjects\dashboardNew" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/app.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration default="true" type="Tox" factoryName="Tox">
+      <module name="dashboardNew" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="C:\Users\Ryazanov\PycharmProjects\dashboardNew\.venv\Scripts\python.exe" />
+      <option name="SDK_NAME" value="Python 3.12 (dashboardNew)" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <arguments>
+        <array />
+      </arguments>
+      <runOnlyEnvs>
+        <array />
+      </runOnlyEnvs>
+      <method v="2" />
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Python.CScore" />
+      </list>
+    </recent_temporary>
   </component>
   <component name="SharedIndexes">
     <attachedChunks>
@@ -135,7 +184,23 @@
       <option name="project" value="LOCAL" />
       <updated>1712843288787</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="first">
+      <option name="closed" value="true" />
+      <created>1712909278616</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1712909278616</updated>
+    </task>
+    <task id="LOCAL-00006" summary="first">
+      <option name="closed" value="true" />
+      <created>1712929014587</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1712929014587</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
@@ -147,7 +212,7 @@
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/scoreboard/CData.py</url>
-          <line>15</line>
+          <line>16</line>
           <option name="timeStamp" value="2" />
         </line-breakpoint>
       </breakpoints>

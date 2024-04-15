@@ -1,13 +1,13 @@
 from datetime import datetime
 from datetime import timedelta
 
-from scoreboard.enums import JOB_TYPE, JOB_STATUS, LINE_ID, BREAK_TYPE, DATA_SCORE_TYPE, JOB_TIME, JOB_BREAK_ARRAY_DATA
+from scoreboard.enums import JOB_TYPE, JOB_STATUS, LINE_ID, BREAK_TYPE, DATA_SCORE_TYPE
 
 from sql.enums import CONNECT_DB_TYPE, TIME_ZONES
 from sql.CSQL import NotConnectToDB, ErrorSQLQuery, ErrorSQLData
 
 from sql.CSQLAgent import CSqlAgent
-from sql.sql_data import PLAN_TABLE_FIELDS, SQL_TABLE_NAME, ASSEMBLED_TABLE_FIELDS
+from sql.sql_data import SQL_TABLE_NAME, ASSEMBLED_TABLE_FIELDS
 from log.Clog import Clog
 from scoreboard.CData import CData
 
@@ -38,31 +38,23 @@ class CScore:
         # Данные смены
         self.job_break_type = BREAK_TYPE.NONE
 
-        cdate = datetime.now()
-        #
-        day = cdate.day
-        month = cdate.month
-        year = cdate.year
-
-        mins = cdate.minute
-        hours = cdate.hour
-        seconds = cdate.second
-
-        c_job_time = JOB_TYPE.NONE
-        if 8 <= hours <= 20:
-            c_job_time = JOB_TYPE.DAY
-        elif 21 <= hours <= 8:
-            c_job_time = JOB_TYPE.NIGHT
-        else:  # На всякий )))
-            c_job_time = JOB_TYPE.NONE
-
         self.current_job_status = JOB_STATUS.NONE  # Тип смены закончена перерыв итд
-        self.current_job_time = c_job_time  # Тип рабочего времени - день и ночь
+        self.current_job_time = JOB_TYPE.NONE  # Тип рабочего времени - день и ночь
+
+        # ticks
+
+        self.count_tv_on_5min_css = ""  # Скорость за 5 минут
+
+        self.average_fact_on_hour_css = ""  # css средней скорости
+
+        self.count_tv_average_ph_for_plan_css = ""  # css выборки за час
+
+        self.count_tv_forecast_on_day_css = ""  # Прогноз за день
 
     def reload_data(self):
         pass
 
-    def __get_12hours_data(self, job_time: JOB_TYPE):
+    def __get_12hours_data(self, cdata_unit: CData):
 
         sql_line_id = CCommon.get_line_id_for_sql(self.current_line)
         if sql_line_id:
@@ -83,14 +75,16 @@ class CScore:
                     time_line_start = str()
                     time_zone_str = CCommon.get_time_zone_str_from_country_time_zone(self.current_time_zone)
 
+                    job_time = cdata_unit.get_job_time_type()
+
                     if job_time == JOB_TYPE.DAY:
                         time_line_start = (
-                            f"{year}-{month}-{day} 08:00:00.0+"
+                            f"{year}-{month}-{day} {cdata_unit.start_job_day}:00.0+"
                             f"{time_zone_str}")
 
                     elif job_time == JOB_TYPE.NIGHT:  # Ночь
                         time_line_start = (
-                            f"{year}-{month}-{day} 20:00:00.0+"
+                            f"{year}-{month}-{day} {cdata_unit.start_job_night}:00.0+"
                             f"{time_zone_str}")
 
                     query_string = (f"SELECT COUNT(DISTINCT {ASSEMBLED_TABLE_FIELDS.fd_tv_sn}) as tv_all_count "
@@ -126,7 +120,7 @@ class CScore:
                 global_sql.disconnect_from_db()
         return False
 
-    def get_hours_score(self, score_type: DATA_SCORE_TYPE, job_time: JOB_TYPE, break_params: list):
+    def get_hours_score(self, score_type: DATA_SCORE_TYPE, break_params: list, cdata_unit: CData):
         sql_line_id = CCommon.get_line_id_for_sql(self.current_line)
         if sql_line_id:
 
@@ -139,23 +133,28 @@ class CScore:
 
                     cdate = datetime.now()
 
-                    mins = cdate.minute
-                    hours = cdate.hour
                     seconds = cdate.second
                     #
                     day = cdate.day
                     month = cdate.month
                     year = cdate.year
 
-                    time_line_start = str()
                     time_zone_str = CCommon.get_time_zone_str_from_country_time_zone(self.current_time_zone)
 
                     delay_for_break = 0
                     if isinstance(break_params, list):
                         if break_params[0] != BREAK_TYPE.NONE:
                             delay_for_break = break_params[1]
+                    job_time = cdata_unit.get_job_time_type()
 
-                    start_date = cdate.strptime(f"{year}/{month}/{day} {hours}/{mins}/{seconds}", "%Y/%m/%d %H/%M/%S")
+                    start_date = None
+                    if job_time == JOB_TYPE.DAY:
+                        start_date = cdate.strptime(f"{year}/{month}/{day} {cdata_unit.start_job_day}/{seconds}",
+                                                    "%Y/%m/%d %H/%M/%S")
+                    elif job_time == JOB_TYPE.NIGHT:
+                        start_date = cdate.strptime(f"{year}/{month}/{day} {cdata_unit.start_job_night}/{seconds}",
+                                                    "%Y/%m/%d %H/%M/%S")
+
                     start_ex_date = int()
                     if score_type == DATA_SCORE_TYPE.ONE_HOUR_DATA:
                         start_ex_date = start_date - timedelta(
@@ -170,15 +169,10 @@ class CScore:
                     day_correct_start = start_ex_date.day
                     mon_correct_start = start_ex_date.month
 
-                    if job_time == JOB_TYPE.DAY:
-                        time_line_start = (
-                            f"{year}-{mon_correct_start}-{day_correct_start} {hours_correct_start}:{mins_correct_start}:{seconds_correct_start}.0+"
-                            f"{time_zone_str}")
-
-                    elif job_time == JOB_TYPE.NIGHT:  # Ночь
-                        time_line_start = (
-                            f"{year}-{mon_correct_start}-{day_correct_start} {hours_correct_start}:{mins_correct_start}:{seconds_correct_start}.0+"
-                            f"{time_zone_str}")
+                    time_line_start = (
+                        f"{year}-{mon_correct_start}-{day_correct_start} {hours_correct_start}:"
+                        f"{mins_correct_start}:{seconds_correct_start}.0+"
+                        f"{time_zone_str}")
 
                     query_string = (f"SELECT COUNT(DISTINCT {ASSEMBLED_TABLE_FIELDS.fd_tv_sn}) as tv_count "
                                     f"FROM {SQL_TABLE_NAME.assembled_tv} "
@@ -217,40 +211,180 @@ class CScore:
                 global_sql.disconnect_from_db()
         return False
 
+    def get_end_job_score(self, cdata_unit: CData):
+        sql_line_id = CCommon.get_line_id_for_sql(self.current_line)
+        if sql_line_id:
+            global_sql = CSqlAgent(self.current_time_zone)
+
+            try:
+                result = global_sql.connect_to_db(CONNECT_DB_TYPE.LINE)
+                sql_handle = global_sql.get_sql_handle()
+                Clog.lprint(f"Подключение к БД(CScore): CONNECT_DB_TYPE.LINE [sql_handle: {sql_handle}]")
+                if result:
+
+                    cdate = datetime.now()
+                    #
+                    day = cdate.day
+                    month = cdate.month
+                    year = cdate.year
+
+                    mins = cdate.minute
+                    hours = cdate.hour
+
+                    mins_correct = mins
+                    hours_correct = hours
+
+                    day_correct = day
+                    month_correct = month
+                    year_correct = year
+
+                    job_time = cdata_unit.get_job_time_type()
+
+                    if job_time == JOB_TYPE.DAY:
+
+                        start_date = cdate.strptime(f"{year}/{month}/{day} {cdata_unit.start_job_day}:00",
+                                                    "%Y/%m/%d %H:%M:%S")
+
+                        if not CCommon.is_current_day_time():
+                            end_date = start_date - timedelta(days=1)
+                            mins_correct = end_date.minute
+                            hours_correct = end_date.hour
+                            # seconds_correct = end_date.second
+                            day_correct = end_date.day
+                            month_correct = end_date.month
+                            year_correct = end_date.year
+
+                    elif job_time == JOB_TYPE.NIGHT:
+
+                        start_date = cdate.strptime(f"{year}/{month}/{day} {cdata_unit.start_job_night}:00",
+                                                    "%Y/%m/%d %H:%M:%S")
+
+                        if CCommon.is_current_day_time():
+                            end_date = start_date - timedelta(days=1)
+                            mins_correct = end_date.minute
+                            hours_correct = end_date.hour
+                            # seconds_correct = end_date.second
+                            day_correct = end_date.day
+                            month_correct = end_date.month
+                            year_correct = end_date.year
+
+                    time_zone_str = CCommon.get_time_zone_str_from_country_time_zone(self.current_time_zone)
+
+                    time_line_start = (
+                        f"{year_correct}-{month_correct}-{day_correct} {hours_correct}:{mins_correct}:00+"
+                        f"{time_zone_str}")
+
+                    sql_line_id = CCommon.get_line_id_for_sql(self.current_line)
+                    # Получим количество телеков всего по факту за смену по интервалу от начала смены до конца
+                    query_string = (f"SELECT COUNT(*) as tv_all_count FROM {SQL_TABLE_NAME.assembled_tv} "
+                                    f"WHERE {ASSEMBLED_TABLE_FIELDS.fd_linefk} = {sql_line_id} "
+                                    f"AND {ASSEMBLED_TABLE_FIELDS.fd_completed_date} >= '{time_line_start}' LIMIT 3000")
+
+                    result = global_sql.sql_query_and_get_result(
+
+                        sql_handle, query_string, (sql_line_id,), "_1", )  # Запрос типа аасоциативного массива
+                    if result is False:  # Errorrrrrrrrrrrrr based data
+                        return False
+                    # print(result)
+
+                    devices_count = result[0].get("tv_all_count", None)
+                    if devices_count is not None:
+                        self.assembled_device = devices_count
+
+                        Clog.lprint(f"CScore -> get_one_hours_data ->  Данные получены!")
+                        return True
+
+            except NotConnectToDB as err:
+                Clog.lprint(f"Внимание! Ошибка SQL: NotConnectToDB [{err}]")
+            except ErrorSQLQuery as err:
+                Clog.lprint(f"Внимание! Ошибка SQL: ErrorSQLQuery [{err}]")
+            except ErrorSQLData as err:
+                Clog.lprint(f"Внимание! Ошибка SQL: ErrorSQLData [{err}]")
+            except Exception as err:
+                Clog.lprint(f"Внимание! Ошибка SQL: NonType [{err}]")
+
+            finally:
+                Clog.lprint(f"Отключение от БД(CScore): CONNECT_DB_TYPE.LOCAL [sql_handle: "
+                            f"{global_sql.get_sql_handle()}]")
+                global_sql.disconnect_from_db()
+        return False
+
     def clear_data(self):
-        pass
+        self.current_time_zone = TIME_ZONES.NONE
+        self.current_line = LINE_ID.LINE_NONE
+
+        # Основное с вывода табло
+
+        # слева табло
+        self.total_day_plan = 0  # Дневной план
+        self.total_day_plan_speed = 0  # Расчётная скорость телеков в час
+        # относительно дневного плана (Меняыется только со сменой плана)
+        # справа табло
+        self.assembled_device = 0  # Собранных на текущий момент
+        self.assembled_device_speed = 0  # Скорость в час относительно собранных по факту
+
+        # футер
+        self.assembled_speed_for_last_five_mins = 0  # Собрано за последние 5 минут
+        self.assembled_speed_for_last_one_hour = 0  # Собрано за последний час
+        self.assembled_forecast_for_day = 0  # Прогноз за день
+
+        # Данные смены
+        self.job_break_type = BREAK_TYPE.NONE
+
+        self.current_job_status = JOB_STATUS.NONE  # Тип смены закончена перерыв итд
+        self.current_job_time = JOB_TYPE.NONE  # Тип рабочего времени - день и ночь
 
     def load_data(self):
-        if self.current_job_time == JOB_TYPE.NONE:
+        if self.current_job_time != JOB_TYPE.NONE:
             Clog.lprint(f"Ошибка! Тип смены[День, ночь] не выбран!")
             return
 
-        self.current_job_status = JOB_STATUS.JOB_IN_PROCESS  # Статус работы - закончена, идёт, перерыв итд
-
+        # cdata
         data_unit = CData(self.current_time_zone, self.current_line)
         data_unit.get_data_for_line()
-        break_list = data_unit.get_current_break_time(self.current_job_time)
+
+        current_job_time = data_unit.get_job_time_type()
+        self.current_job_time = current_job_time
+
+        break_list = data_unit.get_current_break_time(current_job_time)
+
+        # code
 
         self.total_day_plan = data_unit.get_day_total_plane()  # Дневной план
         self.total_day_plan_speed = data_unit.get_day_plane_total_speed_for_hour(
-            self.current_job_time)  # Расчётная скорость телеков в час
+            current_job_time)  # Расчётная скорость телеков в час
 
-        self.__get_12hours_data(self.current_job_time)
-        self.get_hours_score(DATA_SCORE_TYPE.ONE_HOUR_DATA, self.current_job_time, break_list)
-        self.get_hours_score(DATA_SCORE_TYPE.FIVE_MINS_DATA, self.current_job_time, break_list)
+        self.get_hours_score(DATA_SCORE_TYPE.ONE_HOUR_DATA, break_list, data_unit)
 
         # расчёт типа смены[день ночь] и статуса[перерыв, работа итд]
-        if self.current_job_time == JOB_TYPE.NIGHT:
-            if self.assembled_speed_for_last_one_hour == 0:
-                self.current_job_status = JOB_STATUS.JOB_END
+        if current_job_time == JOB_TYPE.DAY:
+
+            if not CCommon.is_current_day_time():
+                if self.assembled_speed_for_last_one_hour == 0:
+                    self.current_job_status = JOB_STATUS.JOB_END
+                else:
+                    self.current_job_status = JOB_STATUS.JOB_IN_PROCESS
             else:
                 self.current_job_status = JOB_STATUS.JOB_IN_PROCESS
 
-        elif self.current_job_time == JOB_TYPE.DAY:
+        elif current_job_time == JOB_TYPE.NIGHT:
             self.current_job_status = JOB_STATUS.JOB_IN_PROCESS
 
-        is_break = False
-        if self.current_job_status == JOB_STATUS.JOB_IN_PROCESS:
+            if CCommon.is_current_day_time():
+                if self.assembled_speed_for_last_one_hour == 0:
+                    self.current_job_status = JOB_STATUS.JOB_END
+                else:
+                    self.current_job_status = JOB_STATUS.JOB_IN_PROCESS
+            else:
+                self.current_job_status = JOB_STATUS.JOB_IN_PROCESS
+
+        if self.current_job_status == JOB_STATUS.JOB_IN_PROCESS or self.current_job_status == JOB_STATUS.JOB_BREAK:
+
+            self.__get_12hours_data(data_unit)
+            self.get_hours_score(DATA_SCORE_TYPE.ONE_HOUR_DATA, break_list, data_unit)
+            self.get_hours_score(DATA_SCORE_TYPE.FIVE_MINS_DATA, break_list, data_unit)
+
+            is_break = False
 
             if isinstance(break_list, list):
                 ctype = break_list[0]
@@ -263,30 +397,38 @@ class CScore:
                 self.current_job_status = JOB_STATUS.JOB_IN_PROCESS
                 self.job_break_type = BREAK_TYPE.NONE
 
-        # время от старта смены и до текущего момента с компенсацией перерыва
-        compensace_list = data_unit.get_compensace_start_to_now_time(self.current_job_time)
-        start_to_now_compensace = compensace_list[
-            0]  # время от старта смены и до текущего момента с компенсацией перерыва
-        now_to_end_compensace = compensace_list[1]  # время от конца смены до текущего момента
+            # время от старта смены и до текущего момента с компенсацией перерыва
+            compensace_list = data_unit.get_compensace_start_to_now_time(current_job_time)
+            start_to_now_compensace = compensace_list[
+                0]  # время от старта смены и до текущего момента с компенсацией перерыва
+            now_to_end_compensace = compensace_list[1]  # время от конца смены до текущего момента
 
-        # Компенсация времени перерыва если он начат
+            # Компенсация времени перерыва если он начат
 
-        compensace_sec_current_break = 0
-        if is_break is True:
-            compensace_sec_current_break = data_unit.get_break_last_time(self.job_break_type, self.current_job_time)
+            compensace_sec_current_break = 0
+            if is_break is True:
+                compensace_sec_current_break = data_unit.get_break_last_time(self.job_break_type, current_job_time)
 
-        # Скорость дневного плана в час
-        self.assembled_device_speed = int(
-            self.assembled_device / ((start_to_now_compensace - compensace_sec_current_break) / 3600))
+            # Скорость дневного плана в час
+            self.assembled_device_speed = int(
+                self.assembled_device / ((start_to_now_compensace - compensace_sec_current_break) / 3600))
 
-        # Прогноз за день
-        hour_nte = now_to_end_compensace / 3600  # Количетво часов из оставшегося времени до конца смены
-        forecast_day_for_day_nte = int(self.assembled_device_speed * hour_nte)
-        self.assembled_forecast_for_day = self.assembled_device + forecast_day_for_day_nte
+            # Прогноз за день
+            hour_nte = now_to_end_compensace / 3600  # Количетво часов из оставшегося времени до конца смены
+            forecast_day_for_day_nte = int(self.assembled_device_speed * hour_nte)
+            self.assembled_forecast_for_day = self.assembled_device + forecast_day_for_day_nte
+
+        elif self.current_job_status == JOB_STATUS.JOB_END:
+            # TODO Блок показа общего плана за смену
+
+            self.get_end_job_score(data_unit)
 
         # расчёт цветов для фронтенда
+        self.get_speed_ticks(data_unit)
 
         print("Перерыв " + str(break_list))
+        print("Тип смены " + str(self.current_job_status))
+
         # слева
         print("Дневной план " + str(self.total_day_plan))
         print("Скорость дневного плана в час " + str(self.total_day_plan_speed))
@@ -299,6 +441,81 @@ class CScore:
         print("За последние пять минут " + str(self.assembled_speed_for_last_five_mins))
         print("За последний час " + str(self.assembled_speed_for_last_one_hour))
         print("Прогноз за день " + str(self.assembled_forecast_for_day))
+
+    def get_speed_ticks(self, cdata_unit):
+        """
+        Вычисление тиков для вычислений цветов ксс
+        :return:
+        """
+
+        # ---------------------------- Высчитываем такты
+        """ 
+        h1_tact: Оптимальный такст для выпуска тв за час
+        opt_tact:  Оптимальный такст количество секунд затраченное на 1 телек
+        opt_speed:  Оптимальная скорость для всей смены
+        """
+        current_job_time = cdata_unit.get_job_time_type()
+        all_job_time_sec = cdata_unit.get_all_job_time(current_job_time)
+
+        if self.current_job_status == JOB_STATUS.JOB_IN_PROCESS:
+
+            # TODO Работа в процессе
+
+            # opt_time_for_hour = int((self.total_day_plan / all_job_time_sec) * 5 * 60)
+            # # int(count_all_plan / (all_job_time_hours * 3600) * 3600)
+            # self.opt_time_for_hour = opt_time_for_hour
+
+            # buff = 1 if self.assembled_speed_for_last_one_hour == 0 else self.assembled_speed_for_last_one_hour
+            # # Деление на ноль исключаем
+            # h1_tact = int(3600 / buff)
+
+            # buff = 1 if self.total_day_plan == 0 else self.total_day_plan
+            # # Деление на ноль исключаем
+            # opt_tact = int(all_job_time_sec / buff)
+
+            # Оптимальная скорость для всей смены за час
+            opt_speed = int(self.total_day_plan / all_job_time_sec * 3600)
+
+            opt_time_for_fivem = int(self.total_day_plan / all_job_time_sec * 5 * 60)
+
+            # ------------------ Получение css относительно количества
+
+            self.count_tv_on_5min_css = CCommon.estimate(self.assembled_speed_for_last_five_mins, opt_time_for_fivem)
+            # Скорость за 5 минут
+
+            self.average_fact_on_hour_css = CCommon.estimate(self.total_day_plan_speed,
+                                                             opt_speed)  # css средней скорости
+
+            self.count_tv_average_ph_for_plan_css = CCommon.estimate(self.assembled_speed_for_last_one_hour, opt_speed)
+            # css выборки за час
+
+            self.count_tv_forecast_on_day_css = CCommon.estimate(self.assembled_forecast_for_day, self.total_day_plan)
+            # Прогноз за день
+
+        elif self.current_job_status == JOB_STATUS.JOB_END:
+
+            count_tv_average_ph_for_plan = int(
+                self.assembled_device / (
+                        all_job_time_sec / 3600))  # int(count_tv_forecast_on_day / (all_job_time_mins / 60))
+
+            self.total_day_plan_speed = count_tv_average_ph_for_plan
+
+            # ------------------ Получение css относительно количества
+            self.count_tv_on_5min_css = "-"  # Скорость за 5 минут
+
+            opt_speed = int(self.total_day_plan / all_job_time_sec * 3600)
+
+            self.average_fact_on_hour_css = CCommon.estimate(count_tv_average_ph_for_plan, opt_speed)
+            # class_func.estimate(int((1 / h1_tact) * 10000), int((1 / opt_tact) * 10000))  # css средней скорости
+
+            self.count_tv_average_ph_for_plan_css = "-"
+            # css выборки за час
+
+            self.assembled_speed_for_last_five_mins = 0
+            self.assembled_forecast_for_day = 0
+            self.assembled_speed_for_last_one_hour = 0
+
+            self.count_tv_forecast_on_day_css = "-"
 
 
 #
