@@ -134,6 +134,8 @@ class CScore:
                     cdate = datetime.now()
 
                     seconds = cdate.second
+                    hours = cdate.hour
+                    mins = cdate.minute
                     #
                     day = cdate.day
                     month = cdate.month
@@ -147,13 +149,8 @@ class CScore:
                             delay_for_break = break_params[1]
                     job_time = cdata_unit.get_job_time_type()
 
-                    start_date = None
-                    if job_time == JOB_TYPE.DAY:
-                        start_date = cdate.strptime(f"{year}/{month}/{day} {cdata_unit.start_job_day}/{seconds}",
-                                                    "%Y/%m/%d %H/%M/%S")
-                    elif job_time == JOB_TYPE.NIGHT:
-                        start_date = cdate.strptime(f"{year}/{month}/{day} {cdata_unit.start_job_night}/{seconds}",
-                                                    "%Y/%m/%d %H/%M/%S")
+                    start_date = cdate.strptime(f"{year}/{month}/{day} {hours}:{mins}/{seconds}",
+                                                "%Y/%m/%d %H:%M/%S")
 
                     start_ex_date = int()
                     if score_type == DATA_SCORE_TYPE.ONE_HOUR_DATA:
