@@ -11,7 +11,7 @@ from sql.sql_data import SQL_TABLE_NAME, ASSEMBLED_TABLE_FIELDS
 from log.Clog import Clog
 from scoreboard.CData import CData
 
-from common import CCommon
+from scoreboard.common import CCommon
 
 
 class CScore:
@@ -395,21 +395,21 @@ class CScore:
         # расчёт цветов для фронтенда
         self.get_speed_ticks(data_unit)
 
-        print("Перерыв " + str(break_list))
-        print("Тип смены " + str(self.current_job_status))
-
-        # слева
-        print("Дневной план " + str(self.total_day_plan))
-        print("Скорость дневного плана в час " + str(self.total_day_plan_speed))
-
-        # справа
-        print("Собрали по факту " + str(self.assembled_device))
-        print("Скорость сборки за час от факта " + str(self.assembled_device_speed))
-
-        # Снизу
-        print("За последние пять минут " + str(self.assembled_speed_for_last_five_mins))
-        print("За последний час " + str(self.assembled_speed_for_last_one_hour))
-        print("Прогноз за день " + str(self.assembled_forecast_for_day))
+        # print("Перерыв " + str(break_list))
+        # print("Тип смены " + str(self.current_job_status))
+        #
+        # # слева
+        # print("Дневной план " + str(self.total_day_plan))
+        # print("Скорость дневного плана в час " + str(self.total_day_plan_speed))
+        #
+        # # справа
+        # print("Собрали по факту " + str(self.assembled_device))
+        # print("Скорость сборки за час от факта " + str(self.assembled_device_speed))
+        #
+        # # Снизу
+        # print("За последние пять минут " + str(self.assembled_speed_for_last_five_mins))
+        # print("За последний час " + str(self.assembled_speed_for_last_one_hour))
+        # print("Прогноз за день " + str(self.assembled_forecast_for_day))
 
         self.__is_result_stored = True
 
@@ -457,7 +457,7 @@ class CScore:
             self.count_tv_on_5min_css = CCommon.estimate(self.assembled_speed_for_last_five_mins, opt_time_for_fivem)
             # Скорость за 5 минут
 
-            self.average_fact_on_hour_css = CCommon.estimate(self.total_day_plan_speed,
+            self.average_fact_on_hour_css = CCommon.estimate(self.assembled_device_speed,
                                                              opt_speed)  # css средней скорости
 
             self.count_tv_average_ph_for_plan_css = CCommon.estimate(self.assembled_speed_for_last_one_hour, opt_speed)
@@ -495,7 +495,9 @@ class CScore:
         if self.current_line == LINE_ID.LINE_KZ_ONE:
             return f"Цех №: Казахстан"
         else:
-            return f"Цех №: {self.current_line}"
+            sql_line_id = CCommon.get_line_id_for_sql(self.current_line)
+
+            return f"Цех №: {sql_line_id}"
 
     def get_title_name(self):
 

@@ -1,9 +1,7 @@
 from datetime import datetime
-from datetime import timedelta
-from typing import List
 
-from scoreboard.enums import LINE_ID, BREAK_TYPE, JOB_TIME, JOB_BREAK_ARRAY_DATA
-from common import CCommon
+from scoreboard.enums import LINE_ID, JOB_TIME, JOB_BREAK_ARRAY_DATA
+from scoreboard.common import CCommon
 from sql.enums import CONNECT_DB_TYPE, TIME_ZONES
 from sql.CSQL import NotConnectToDB, ErrorSQLQuery, ErrorSQLData
 
@@ -28,6 +26,12 @@ class CData:
         self.break_time_night = tuple()
         # день
         self.break_time_day = tuple()
+        # Время старта смены в строке
+        self.start_job_day = "08:00"
+        self.end_job_day = "20:00"
+
+        self.start_job_night = "20:00"
+        self.end_job_night = "08:00"
 
     def get_data_for_line(self):
 
@@ -410,10 +414,6 @@ class CData:
                         last = 0
                     return last
         return False
-
-
-
-
 
 # unit = CData(TIME_ZONES.RUSSIA, LINE_ID.LINE_VRN_ONE)
 # unit.get_data_for_line()
