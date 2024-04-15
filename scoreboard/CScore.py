@@ -19,7 +19,7 @@ class CScore:
 
         self.current_time_zone = time_zone
         self.current_line = line_id
-
+        self.__is_result_stored = False
         # Основное с вывода табло
 
         # слева табло
@@ -50,9 +50,6 @@ class CScore:
         self.count_tv_average_ph_for_plan_css = ""  # css выборки за час
 
         self.count_tv_forecast_on_day_css = ""  # Прогноз за день
-
-    def reload_data(self):
-        pass
 
     def __get_12hours_data(self, cdata_unit: CData):
 
@@ -306,31 +303,6 @@ class CScore:
                 global_sql.disconnect_from_db()
         return False
 
-    def clear_data(self):
-        self.current_time_zone = TIME_ZONES.NONE
-        self.current_line = LINE_ID.LINE_NONE
-
-        # Основное с вывода табло
-
-        # слева табло
-        self.total_day_plan = 0  # Дневной план
-        self.total_day_plan_speed = 0  # Расчётная скорость телеков в час
-        # относительно дневного плана (Меняыется только со сменой плана)
-        # справа табло
-        self.assembled_device = 0  # Собранных на текущий момент
-        self.assembled_device_speed = 0  # Скорость в час относительно собранных по факту
-
-        # футер
-        self.assembled_speed_for_last_five_mins = 0  # Собрано за последние 5 минут
-        self.assembled_speed_for_last_one_hour = 0  # Собрано за последний час
-        self.assembled_forecast_for_day = 0  # Прогноз за день
-
-        # Данные смены
-        self.job_break_type = BREAK_TYPE.NONE
-
-        self.current_job_status = JOB_STATUS.NONE  # Тип смены закончена перерыв итд
-        self.current_job_time = JOB_TYPE.NONE  # Тип рабочего времени - день и ночь
-
     def load_data(self):
         if self.current_job_time != JOB_TYPE.NONE:
             Clog.lprint(f"Ошибка! Тип смены[День, ночь] не выбран!")
@@ -439,6 +411,11 @@ class CScore:
         print("За последний час " + str(self.assembled_speed_for_last_one_hour))
         print("Прогноз за день " + str(self.assembled_forecast_for_day))
 
+        self.__is_result_stored = True
+
+    def get_result_status(self):
+        return self.__is_result_stored
+
     def get_speed_ticks(self, cdata_unit):
         """
         Вычисление тиков для вычислений цветов ксс
@@ -514,7 +491,60 @@ class CScore:
 
             self.count_tv_forecast_on_day_css = "-"
 
+    def get_ceh_name(self):
+        if self.current_line == LINE_ID.LINE_KZ_ONE:
+            return f"Цех №: Казахстан"
+        else:
+            return f"Цех №: {self.current_line}"
 
-#
-unit = CScore(TIME_ZONES.RUSSIA, LINE_ID.LINE_VRN_ONE)
-unit.load_data()
+    def get_title_name(self):
+
+        return f"Статистика {self.get_ceh_name()}"
+
+    def get_job_status_string(self) -> str:
+        """
+        Возврат названия статуса смены
+        :param brake_type:
+        :return:
+        """
+        if self.current_job_status == JOB_STATUS.JOB_IN_PROCESS:
+            if self.current_job_time == JOB_TYPE.NIGHT:
+                return "Ночная смена"
+            else:
+                return "Текущая смена"
+        elif self.current_job_status == JOB_STATUS.JOB_BREAK:
+            return CCommon.get_breaks_name(self.job_break_type)
+        elif self.current_job_status in (JOB_STATUS.JOB_END, JOB_STATUS.NONE):
+            return "Смена окончена"
+
+        return "Неизвестно"
+
+    def get_tv_current_count_for_day_plan(self):
+        return self.total_day_plan
+
+    def get_tv_current_count_for_day_fact(self):  # По факту всего собрано          (3)
+        return self.assembled_device
+
+    def get_tv_current_count_for_hour_plan(self):  # (2)
+        return self.total_day_plan_speed
+
+    def get_tv_current_count_average_speed_for_hour(self):  # (4)
+        return self.assembled_device_speed
+
+    def get_current_speed_for_last_hour(self):  # (5)
+        return self.assembled_speed_for_last_one_hour
+
+    def get_tv_speed_for_five_mins(self): # (6)
+        return self.assembled_speed_for_last_five_mins
+
+    def get_tv_count_day_forecast(self):  # (7)
+        return self.assembled_forecast_for_day
+
+    def get_current_css_styles(self):
+        res = {
+            'count_tv_on_5min_css': self.count_tv_on_5min_css,
+            'count_tv_average_ph_for_plan_css': self.count_tv_average_ph_for_plan_css,
+            'average_fact_on_hour_css': self.average_fact_on_hour_css,
+            'count_tv_forecast_on_day_css': self.count_tv_forecast_on_day_css,
+        }
+        return res

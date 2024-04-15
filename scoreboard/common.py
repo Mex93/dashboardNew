@@ -1,6 +1,8 @@
-from scoreboard.enums import LINE_ID
+from scoreboard.enums import LINE_ID, BREAK_TYPE
 from sql.enums import TIME_ZONES
 from datetime import datetime
+
+from random import randint
 
 
 class CCommon:
@@ -11,7 +13,7 @@ class CCommon:
         return int(int(obj.now().timestamp()))
 
     @staticmethod
-    def get_line_id_for_sql(line_id: LINE_ID) -> int:
+    def get_line_id_for_sql(line_id: LINE_ID) -> int | bool:
 
         match line_id:
             case LINE_ID.LINE_KZ_ONE:
@@ -24,6 +26,23 @@ class CCommon:
                 return 3
             case LINE_ID.LINE_VRN_FOUR:
                 return 4
+        return False
+
+    @staticmethod
+    def get_line_id_type_from_line_id(line_id: int) -> LINE_ID | bool:
+
+        match line_id:
+            case 5:
+                return LINE_ID.LINE_KZ_ONE
+            case 1:
+                return LINE_ID.LINE_VRN_ONE
+            case 2:
+                return LINE_ID.LINE_VRN_TWO
+            case 3:
+                return LINE_ID.LINE_VRN_TRI
+            case 4:
+                return LINE_ID.LINE_VRN_FOUR
+        return False
 
     @staticmethod
     def convert_sec_to_hours(sec: int):
@@ -67,3 +86,19 @@ class CCommon:
             return False
         else:
             return True
+
+    @staticmethod
+    def get_breaks_name(break_type: BREAK_TYPE):
+        match break_type:
+            case BREAK_TYPE.FIRST:
+                return "Время первого перерыва"
+            case BREAK_TYPE.EAT:
+                return "Время обеда"
+            case BREAK_TYPE.DOUBLE:
+                return "Время второго перерыва"
+            case BREAK_TYPE.LAST:
+                return "Время третьего"
+
+    @staticmethod
+    def get_random(max_value: int) -> int:
+        return randint(1, max_value)
