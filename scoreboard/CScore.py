@@ -368,8 +368,8 @@ class CScore:
 
             # время от старта смены и до текущего момента с компенсацией перерыва
             compensace_list = data_unit.get_compensace_start_to_now_time(current_job_time)
-            start_to_now_compensace = compensace_list[
-                0]  # время от старта смены и до текущего момента с компенсацией перерыва
+            start_to_now_compensace = compensace_list[0]
+            # время от старта смены и до текущего момента с компенсацией перерыва
             now_to_end_compensace = compensace_list[1]  # время от конца смены до текущего момента
 
             # Компенсация времени перерыва если он начат
@@ -377,11 +377,12 @@ class CScore:
             compensace_sec_current_break = 0
             if is_break is True:
                 compensace_sec_current_break = data_unit.get_break_last_time(self.job_break_type, current_job_time)
+            else:
+                compensace_sec_current_break = 0
 
             # Скорость дневного плана в час
             self.assembled_device_speed = int(
-                self.assembled_device / ((start_to_now_compensace - compensace_sec_current_break) / 3600))
-
+                self.assembled_device / ((start_to_now_compensace + compensace_sec_current_break) / 3600))
             # Прогноз за день
             hour_nte = now_to_end_compensace / 3600  # Количетво часов из оставшегося времени до конца смены
             forecast_day_for_day_nte = int(self.assembled_device_speed * hour_nte)
@@ -431,7 +432,7 @@ class CScore:
         current_job_time = cdata_unit.get_job_time_type()
         all_job_time_sec = cdata_unit.get_all_job_time(current_job_time)
 
-        if self.current_job_status == JOB_STATUS.JOB_IN_PROCESS:
+        if self.current_job_status == JOB_STATUS.JOB_IN_PROCESS or self.current_job_status == JOB_STATUS.JOB_BREAK:
 
             # TODO Работа в процессе
 

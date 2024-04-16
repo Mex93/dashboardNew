@@ -370,6 +370,7 @@ class CData:
                   ]
 
         time_job_start = self.get_job_time_unix_time(JOB_TIME.START, job_time)  # unix time
+
         start_to_now_sc = current_unix_time - time_job_start
         if start_to_now_sc < 0:
             start_to_now_sc = 0
@@ -378,7 +379,6 @@ class CData:
         time_to_end_smena_sc = time_job_end - current_unix_time
         if time_to_end_smena_sc < 0:
             time_to_end_smena_sc = 0
-
         for br_type in breaks:
             br_params = self.get_break_unit_time(br_type, job_time)
             if isinstance(br_params, list):
@@ -393,7 +393,7 @@ class CData:
                 # now to end
                 if current_unix_time < start:
                     time_to_end_smena_sc -= delay
-
+        # print(start_to_now_sc, time_to_end_smena_sc)
         return [start_to_now_sc, time_to_end_smena_sc]
 
     def get_break_last_time(self, break_type: BREAK_TYPE, job_time: JOB_TYPE) -> bool | int:
