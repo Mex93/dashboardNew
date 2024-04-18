@@ -1,16 +1,38 @@
 from scoreboard.enums import LINE_ID, BREAK_TYPE
 from sql.enums import TIME_ZONES
-from datetime import datetime
+
+from datetime import timedelta
+from datetime import datetime, timezone
+
 
 from random import randint
 
 
 class CCommon:
+    # @staticmethod
+    # def get_current_unix_time(obj=None) -> int:
+    #     if obj is None:
+    #         obj = datetime
+    #     unix_time = obj.now(timezone.utc)
+    #     return int(unix_time.timestamp())   # в utc- (3600 * 3)
+
     @staticmethod
-    def get_current_unix_time(obj=None) -> int:
-        if obj is None:
-            obj = datetime
-        return int(int(obj.now().timestamp()))
+    def get_current_time(time_zone: TIME_ZONES) -> datetime:
+        hours_add = 0
+        if time_zone == TIME_ZONES.RUSSIA:
+            hours_add = 3
+        elif time_zone == TIME_ZONES.KZ:
+            hours_add = 5
+        delta = timedelta(hours=hours_add, minutes=0)
+        return datetime.now(timezone.utc) + delta
+
+    @staticmethod
+    def timestamp_ex(unix_utc: int) -> int:
+        # Независимо от пояса - проверено, так как скрипт работает на GMT 3 сервере и следовательно нужно прибавить 3
+        # (хз почему 3)
+        sec_add = 3 * 3600
+        res = unix_utc + sec_add
+        return res
 
     @staticmethod
     def get_line_id_for_sql(line_id: LINE_ID) -> int | bool:
@@ -52,9 +74,10 @@ class CCommon:
     @staticmethod
     def get_time_zone_str_from_country_time_zone(time_zone: TIME_ZONES):
         if time_zone == TIME_ZONES.RUSSIA:
-            return "0300"
+            return "0300"  # "0300"
         else:
-            return "0600"
+            return "0500"  # 0500
+
     @staticmethod
     def estimate(value: int, opt: int) -> str:
         # $value = intval($value); $opt = intval($opt);
@@ -78,7 +101,7 @@ class CCommon:
             Проверка на часы работы линии. Учитывается день
         :return:
         """
-        cdate = datetime.now()
+        cdate = datetime.now(timezone.utc)
         # mins = current_datetime.min
         hours = cdate.hour
 
@@ -102,3 +125,25 @@ class CCommon:
     @staticmethod
     def get_random(max_value: int) -> int:
         return randint(1, max_value)
+
+    @staticmethod
+    def time_to_utc(time_str: str):
+        if time_str.find(":") == -1:
+            raise ValueError(f"Ошибка даты {time_str}!")
+
+        time = datetime.strptime(time_str, "%H:%M")
+        utc_time = time - timedelta(hours=3)
+        return utc_time.strftime("%H:%M")
+
+    @staticmethod
+    def utc_to_current_zone_time(time_str: str, current_time_zone: str):
+        if time_str.find(":") == -1:
+            raise ValueError(f"Ошибка даты {time_str}!")
+
+        time = datetime.strptime(time_str, "%H:%M")
+        utc_time = None
+        if current_time_zone == "0300":
+            utc_time = time + timedelta(hours=3)
+        elif current_time_zone == "0500":
+            utc_time = time + timedelta(hours=5)
+        return utc_time.strftime("%H:%M")

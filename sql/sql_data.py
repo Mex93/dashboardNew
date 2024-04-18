@@ -1,10 +1,6 @@
 # Название всех таблиц скрипта
 class SQL_TABLE_NAME:
-    user_accounts = "acp_users"
     assembled_tv = "assembled_tv"
-    asr_tv = "unfinished_tv"
-    tv_model_info_tv = "tv"
-    user_logs = "acp_log"
     local_db_plan_table = "plan_settings"
 
 
@@ -41,6 +37,8 @@ class PLAN_TABLE_FIELDS:
     fd_brake_double_time_night_len = "brake_double_time_night_len"
     fd_brake_third_time_night_len = "brake_third_time_night_len"
 
+    fd_job_day_delay = "job_process_delay"
+
     fd_time_hours_on_smena = "smena_hours"
 
     # Время в час:минута
@@ -60,4 +58,5 @@ class ASSEMBLED_TABLE_FIELDS:
     fd_linefk = "line_fk"  # Линия вторичный ключ
     fd_tv_sn = "tv_sn"  # Линия вторичный ключ
     fd_completed_date = "timestamp_st100"  # Дата прохождения черезе упаковку
+
 

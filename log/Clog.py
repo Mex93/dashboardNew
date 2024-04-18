@@ -1,5 +1,5 @@
 class Clog:
-    __log_enable = True
+    __log_enable = False
 
     def __init__(self):
         pass

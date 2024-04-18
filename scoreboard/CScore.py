@@ -1,4 +1,3 @@
-from datetime import datetime
 from datetime import timedelta
 
 from scoreboard.enums import JOB_TYPE, JOB_STATUS, LINE_ID, BREAK_TYPE, DATA_SCORE_TYPE
@@ -60,17 +59,17 @@ class CScore:
             try:
                 result = global_sql.connect_to_db(CONNECT_DB_TYPE.LINE)
                 sql_handle = global_sql.get_sql_handle()
-                Clog.lprint(f"Подключение к БД(CScore): CONNECT_DB_TYPE.LINE [sql_handle: {sql_handle}]")
+                Clog.lprint(
+                    f"Подключение к БД(CScore -> get_12hours_data): CONNECT_DB_TYPE.LINE [sql_handle: {sql_handle}]")
                 if result:
-
-                    cdate = datetime.now()
+                    time_zone_str = CCommon.get_time_zone_str_from_country_time_zone(self.current_time_zone)
+                    cdate = CCommon.get_current_time(self.current_time_zone)
                     #
                     day = cdate.day
                     month = cdate.month
                     year = cdate.year
 
                     time_line_start = str()
-                    time_zone_str = CCommon.get_time_zone_str_from_country_time_zone(self.current_time_zone)
 
                     job_time = cdata_unit.get_job_time_type()
 
@@ -84,18 +83,30 @@ class CScore:
                             f"{year}-{month}-{day} {cdata_unit.start_job_night}:00.0+"
                             f"{time_zone_str}")
 
-                    query_string = (f"SELECT COUNT(DISTINCT {ASSEMBLED_TABLE_FIELDS.fd_tv_sn}) as tv_all_count "
-                                    f"FROM {SQL_TABLE_NAME.assembled_tv} "
-                                    f"WHERE {ASSEMBLED_TABLE_FIELDS.fd_linefk} = {sql_line_id} "
-                                    f"AND {ASSEMBLED_TABLE_FIELDS.fd_completed_date} >= '{time_line_start}' LIMIT 3000")
+                    if self.current_line != LINE_ID.LINE_KZ_ONE:
+                        query_string = (f"SELECT COUNT(DISTINCT {ASSEMBLED_TABLE_FIELDS.fd_tv_sn}) as tv_all_count "
+                                        f"FROM {SQL_TABLE_NAME.assembled_tv} "
+                                        f"WHERE {ASSEMBLED_TABLE_FIELDS.fd_linefk} = {sql_line_id} "
+                                        f"AND {ASSEMBLED_TABLE_FIELDS.fd_completed_date} >= '{time_line_start}' "
+                                        f"LIMIT 3000")
+                    else:
+                        query_string = (f"SELECT COUNT(DISTINCT check_report.assy_id) AS tv_all_count "
+                                        "FROM check_report "
+                                        "JOIN check_description ON check_report.check_id = check_description.check_id "
+                                        "WHERE check_report.check_param_0 = 'PASS' AND "
+                                        "check_description.check_name = 'Completness check' AND "
+                                        f"check_report.check_timestamp >= '{time_line_start}' AND "
+                                        f"check_report.station_id = "
+                                        f"(SELECT station_id FROM stations WHERE station_line = 5 LIMIT 1) "
+                                        f"LIMIT 3000")
 
                     result = global_sql.sql_query_and_get_result(
 
-                        sql_handle, query_string, (sql_line_id,), "_1", )  # Запрос типа аасоциативного массива
+                        sql_handle, query_string, (
+                        ), "_1", )  # Запрос типа аасоциативного массива
                     if result is False:  # Errorrrrrrrrrrrrr based data
                         return False
-                    # print(result)
-
+                    # print(query_string)
                     devices_count = result[0].get("tv_all_count", None)
                     if devices_count is not None:
                         self.assembled_device = devices_count
@@ -103,16 +114,16 @@ class CScore:
                         return True
 
             except NotConnectToDB as err:
-                Clog.lprint(f"Внимание! Ошибка SQL: NotConnectToDB [{err}]")
+                Clog.lprint(f"Внимание! Ошибка SQL: NotConnectToDB [get_12hours_data][{err}]")
             except ErrorSQLQuery as err:
-                Clog.lprint(f"Внимание! Ошибка SQL: ErrorSQLQuery [{err}]")
+                Clog.lprint(f"Внимание! Ошибка SQL: ErrorSQLQuery [get_12hours_data][{err}]")
             except ErrorSQLData as err:
-                Clog.lprint(f"Внимание! Ошибка SQL: ErrorSQLData [{err}]")
+                Clog.lprint(f"Внимание! Ошибка SQL: ErrorSQLData [get_12hours_data][{err}]")
             except Exception as err:
-                Clog.lprint(f"Внимание! Ошибка SQL: NonType [{err}]")
+                Clog.lprint(f"Внимание! Ошибка SQL: NonType [get_12hours_data][{err}]")
 
             finally:
-                Clog.lprint(f"Отключение от БД(CScore): CONNECT_DB_TYPE.LOCAL [sql_handle: "
+                Clog.lprint(f"Отключение от БД(CScore -> get_12hours_data): CONNECT_DB_TYPE.LOCAL [sql_handle: "
                             f"{global_sql.get_sql_handle()}]")
                 global_sql.disconnect_from_db()
         return False
@@ -125,10 +136,11 @@ class CScore:
             try:
                 result = global_sql.connect_to_db(CONNECT_DB_TYPE.LINE)
                 sql_handle = global_sql.get_sql_handle()
-                Clog.lprint(f"Подключение к БД(CScore): CONNECT_DB_TYPE.LINE [sql_handle: {sql_handle}]")
+                Clog.lprint(
+                    f"Подключение к БД(CScore -> get_hours_score): CONNECT_DB_TYPE.LINE [sql_handle: {sql_handle}]")
                 if result:
-
-                    cdate = datetime.now()
+                    time_zone_str = CCommon.get_time_zone_str_from_country_time_zone(self.current_time_zone)
+                    cdate = CCommon.get_current_time(self.current_time_zone)
 
                     seconds = cdate.second
                     hours = cdate.hour
@@ -138,24 +150,29 @@ class CScore:
                     month = cdate.month
                     year = cdate.year
 
-                    time_zone_str = CCommon.get_time_zone_str_from_country_time_zone(self.current_time_zone)
-
-                    delay_for_break = 0
+                    delay_last_time = 0
                     if isinstance(break_params, list):
                         if break_params[0] != BREAK_TYPE.NONE:
-                            delay_for_break = break_params[1]
-                    job_time = cdata_unit.get_job_time_type()
+                            delay_last_time = break_params[1]
+                    # job_time = cdata_unit.get_job_time_type()
 
-                    start_date = cdate.strptime(f"{year}/{month}/{day} {hours}:{mins}/{seconds}",
-                                                "%Y/%m/%d %H:%M/%S")
+                    start_date = cdate.strptime(
+                        f"{year}/{month}/{day} {hours}:{mins}/{seconds}",
+                        "%Y/%m/%d %H:%M/%S")
+                    # print("тут9шки", start_date)
 
                     start_ex_date = int()
                     if score_type == DATA_SCORE_TYPE.ONE_HOUR_DATA:
-                        start_ex_date = start_date - timedelta(
-                            seconds=(60 * 60) + delay_for_break)
+                        start_ex_date = start_date - timedelta(seconds=(60 * 60) + delay_last_time)
                     elif score_type == DATA_SCORE_TYPE.FIVE_MINS_DATA:
-                        start_ex_date = start_date - timedelta(
-                            seconds=(60 * 5) + delay_for_break)
+                        start_ex_date = start_date - timedelta(seconds=(60 * 5) + delay_last_time)
+
+                    # print("тутушки  ", start_ex_date, "erdgdgyvwigw", delay_last_time)
+
+                    # if self.current_line != LINE_ID.LINE_KZ_ONE:
+                    #     start_ex_date = start_ex_date + timedelta(hours=3)
+                    # else:
+                    #     start_ex_date = start_ex_date + timedelta(hours=5)
 
                     mins_correct_start = start_ex_date.minute
                     hours_correct_start = start_ex_date.hour
@@ -168,10 +185,26 @@ class CScore:
                         f"{mins_correct_start}:{seconds_correct_start}.0+"
                         f"{time_zone_str}")
 
-                    query_string = (f"SELECT COUNT(DISTINCT {ASSEMBLED_TABLE_FIELDS.fd_tv_sn}) as tv_count "
-                                    f"FROM {SQL_TABLE_NAME.assembled_tv} "
-                                    f"WHERE {ASSEMBLED_TABLE_FIELDS.fd_linefk} = {sql_line_id} "
-                                    f"AND {ASSEMBLED_TABLE_FIELDS.fd_completed_date} >= '{time_line_start}' LIMIT 300")
+                    # print(f"{hours_correct_start}:{mins_correct_start}")
+
+                    if self.current_line != LINE_ID.LINE_KZ_ONE:
+
+                        query_string = (f"SELECT COUNT(DISTINCT {ASSEMBLED_TABLE_FIELDS.fd_tv_sn}) as tv_count "
+                                        f"FROM {SQL_TABLE_NAME.assembled_tv} "
+                                        f"WHERE {ASSEMBLED_TABLE_FIELDS.fd_linefk} = {sql_line_id} "
+                                        f"AND {ASSEMBLED_TABLE_FIELDS.fd_completed_date} >= '{time_line_start}' LIMIT 300")
+                        #print(query_string)
+                    else:
+                        query_string = (f"SELECT COUNT(DISTINCT check_report.assy_id) AS tv_count "
+                                        "FROM check_report "
+                                        "JOIN check_description ON check_report.check_id = check_description.check_id "
+                                        "WHERE check_report.check_param_0 = 'PASS' AND "
+                                        "check_description.check_name = 'Completness check' AND "
+                                        f"check_report.check_timestamp >= '{time_line_start}' AND "
+                                        f"check_report.station_id = "
+                                        f"(SELECT station_id FROM stations WHERE station_line = 5 LIMIT 1) "
+                                        f"LIMIT 300")
+
 
                     result = global_sql.sql_query_and_get_result(
 
@@ -185,22 +218,23 @@ class CScore:
 
                         if score_type == DATA_SCORE_TYPE.ONE_HOUR_DATA:
                             self.assembled_speed_for_last_one_hour = devices_count
+                            # print(query_string)
                         elif score_type == DATA_SCORE_TYPE.FIVE_MINS_DATA:
                             self.assembled_speed_for_last_five_mins = devices_count
                         Clog.lprint(f"CScore -> get_one_hours_data ->  Данные получены!")
                         return True
 
             except NotConnectToDB as err:
-                Clog.lprint(f"Внимание! Ошибка SQL: NotConnectToDB [{err}]")
+                Clog.lprint(f"Внимание! Ошибка SQL: NotConnectToDB [get_hours_score][{err}]")
             except ErrorSQLQuery as err:
-                Clog.lprint(f"Внимание! Ошибка SQL: ErrorSQLQuery [{err}]")
+                Clog.lprint(f"Внимание! Ошибка SQL: ErrorSQLQuery [get_hours_score][{err}]")
             except ErrorSQLData as err:
-                Clog.lprint(f"Внимание! Ошибка SQL: ErrorSQLData [{err}]")
+                Clog.lprint(f"Внимание! Ошибка SQL: ErrorSQLData [get_hours_score][{err}]")
             except Exception as err:
-                Clog.lprint(f"Внимание! Ошибка SQL: NonType [{err}]")
+                Clog.lprint(f"Внимание! Ошибка SQL: NonType [get_hours_score][{err}]")
 
             finally:
-                Clog.lprint(f"Отключение от БД(CScore): CONNECT_DB_TYPE.LOCAL [sql_handle: "
+                Clog.lprint(f"Отключение от БД(CScore -> get_hours_score): CONNECT_DB_TYPE.LOCAL [sql_handle: "
                             f"{global_sql.get_sql_handle()}]")
                 global_sql.disconnect_from_db()
         return False
@@ -213,10 +247,12 @@ class CScore:
             try:
                 result = global_sql.connect_to_db(CONNECT_DB_TYPE.LINE)
                 sql_handle = global_sql.get_sql_handle()
-                Clog.lprint(f"Подключение к БД(CScore): CONNECT_DB_TYPE.LINE [sql_handle: {sql_handle}]")
+                Clog.lprint(
+                    f"Подключение к БД(CScore -> get_end_job_score): CONNECT_DB_TYPE.LINE [sql_handle: {sql_handle}]")
                 if result:
 
-                    cdate = datetime.now()
+                    time_zone_str = CCommon.get_time_zone_str_from_country_time_zone(self.current_time_zone)
+                    cdate = CCommon.get_current_time(self.current_time_zone)
                     #
                     day = cdate.day
                     month = cdate.month
@@ -234,35 +270,27 @@ class CScore:
 
                     job_time = cdata_unit.get_job_time_type()
 
+                    start_date = None
                     if job_time == JOB_TYPE.DAY:
 
                         start_date = cdate.strptime(f"{year}/{month}/{day} {cdata_unit.start_job_day}:00",
                                                     "%Y/%m/%d %H:%M:%S")
 
-                        if not CCommon.is_current_day_time():
-                            end_date = start_date - timedelta(days=1)
-                            mins_correct = end_date.minute
-                            hours_correct = end_date.hour
-                            # seconds_correct = end_date.second
-                            day_correct = end_date.day
-                            month_correct = end_date.month
-                            year_correct = end_date.year
-
                     elif job_time == JOB_TYPE.NIGHT:
 
                         start_date = cdate.strptime(f"{year}/{month}/{day} {cdata_unit.start_job_night}:00",
                                                     "%Y/%m/%d %H:%M:%S")
+                    if start_date is not None:
+                        if ((job_time == JOB_TYPE.DAY and not CCommon.is_current_day_time()) or
+                                (job_time == JOB_TYPE.NIGHT and CCommon.is_current_day_time())):
 
-                        if CCommon.is_current_day_time():
-                            end_date = start_date - timedelta(days=1)
-                            mins_correct = end_date.minute
-                            hours_correct = end_date.hour
-                            # seconds_correct = end_date.second
-                            day_correct = end_date.day
-                            month_correct = end_date.month
-                            year_correct = end_date.year
-
-                    time_zone_str = CCommon.get_time_zone_str_from_country_time_zone(self.current_time_zone)
+                            start_date = start_date - timedelta(days=1)
+                            mins_correct = start_date.minute
+                            hours_correct = start_date.hour
+                            # seconds_correct = start_date.second
+                            day_correct = start_date.day
+                            month_correct = start_date.month
+                            year_correct = start_date.year
 
                     time_line_start = (
                         f"{year_correct}-{month_correct}-{day_correct} {hours_correct}:{mins_correct}:00+"
@@ -270,9 +298,22 @@ class CScore:
 
                     sql_line_id = CCommon.get_line_id_for_sql(self.current_line)
                     # Получим количество телеков всего по факту за смену по интервалу от начала смены до конца
-                    query_string = (f"SELECT COUNT(*) as tv_all_count FROM {SQL_TABLE_NAME.assembled_tv} "
-                                    f"WHERE {ASSEMBLED_TABLE_FIELDS.fd_linefk} = {sql_line_id} "
-                                    f"AND {ASSEMBLED_TABLE_FIELDS.fd_completed_date} >= '{time_line_start}' LIMIT 3000")
+
+                    if self.current_line != LINE_ID.LINE_KZ_ONE:
+
+                        query_string = (f"SELECT COUNT(*) as tv_all_count FROM {SQL_TABLE_NAME.assembled_tv} "
+                                        f"WHERE {ASSEMBLED_TABLE_FIELDS.fd_linefk} = {sql_line_id} "
+                                        f"AND {ASSEMBLED_TABLE_FIELDS.fd_completed_date} >= '{time_line_start}' LIMIT 3000")
+                    else:
+                        query_string = (f"SELECT COUNT(DISTINCT check_report.assy_id) AS tv_all_count "
+                                        "FROM check_report "
+                                        "JOIN check_description ON check_report.check_id = check_description.check_id "
+                                        "WHERE check_report.check_param_0 = 'PASS' AND "
+                                        "check_description.check_name = 'Completness check' AND "
+                                        f"check_report.check_timestamp >= '{time_line_start}' AND "
+                                        f"check_report.station_id = "
+                                        f"(SELECT station_id FROM stations WHERE station_line = 5 LIMIT 1) "
+                                        f"LIMIT 3000")
 
                     result = global_sql.sql_query_and_get_result(
 
@@ -289,16 +330,16 @@ class CScore:
                         return True
 
             except NotConnectToDB as err:
-                Clog.lprint(f"Внимание! Ошибка SQL: NotConnectToDB [{err}]")
+                Clog.lprint(f"Внимание! Ошибка SQL: NotConnectToDB [get_end_job_score] [{err}]")
             except ErrorSQLQuery as err:
-                Clog.lprint(f"Внимание! Ошибка SQL: ErrorSQLQuery [{err}]")
+                Clog.lprint(f"Внимание! Ошибка SQL: ErrorSQLQuery [get_end_job_score] [{err}]")
             except ErrorSQLData as err:
-                Clog.lprint(f"Внимание! Ошибка SQL: ErrorSQLData [{err}]")
+                Clog.lprint(f"Внимание! Ошибка SQL: ErrorSQLData [get_end_job_score] [{err}]")
             except Exception as err:
-                Clog.lprint(f"Внимание! Ошибка SQL: NonType [{err}]")
+                Clog.lprint(f"Внимание! Ошибка SQL: NonType [get_end_job_score] [{err}]")
 
             finally:
-                Clog.lprint(f"Отключение от БД(CScore): CONNECT_DB_TYPE.LOCAL [sql_handle: "
+                Clog.lprint(f"Отключение от БД(CScore -> get_end_job_score): CONNECT_DB_TYPE.LOCAL [sql_handle: "
                             f"{global_sql.get_sql_handle()}]")
                 global_sql.disconnect_from_db()
         return False
@@ -310,7 +351,7 @@ class CScore:
 
         # cdata
         data_unit = CData(self.current_time_zone, self.current_line)
-        data_unit.get_data_for_line()
+        data_unit.get_data_for_line(self.current_time_zone)
 
         current_job_time = data_unit.get_job_time_type()
         self.current_job_time = current_job_time
@@ -321,7 +362,7 @@ class CScore:
 
         self.total_day_plan = data_unit.get_day_total_plane()  # Дневной план
         self.total_day_plan_speed = data_unit.get_day_plane_total_speed_for_hour(
-            current_job_time)  # Расчётная скорость телеков в час
+            current_job_time, data_unit.job_day_delay)  # Расчётная скорость телеков в час
 
         self.get_hours_score(DATA_SCORE_TYPE.ONE_HOUR_DATA, break_list, data_unit)
 
@@ -381,8 +422,14 @@ class CScore:
                 compensace_sec_current_break = 0
 
             # Скорость дневного плана в час
-            self.assembled_device_speed = int(
-                self.assembled_device / ((start_to_now_compensace + compensace_sec_current_break) / 3600))
+
+            if self.assembled_device == 0:
+                self.assembled_device_speed = 0
+            else:
+                # print(start_to_now_compensace, compensace_sec_current_break)
+                self.assembled_device_speed = int(
+                    self.assembled_device / ((start_to_now_compensace + compensace_sec_current_break) / 3600))
+
             # Прогноз за день
             hour_nte = now_to_end_compensace / 3600  # Количетво часов из оставшегося времени до конца смены
             forecast_day_for_day_nte = int(self.assembled_device_speed * hour_nte)
@@ -430,7 +477,7 @@ class CScore:
         opt_speed:  Оптимальная скорость для всей смены
         """
         current_job_time = cdata_unit.get_job_time_type()
-        all_job_time_sec = cdata_unit.get_all_job_time(current_job_time)
+        all_job_time_sec = cdata_unit.get_all_job_time(current_job_time, cdata_unit.job_day_delay)
 
         if self.current_job_status == JOB_STATUS.JOB_IN_PROCESS or self.current_job_status == JOB_STATUS.JOB_BREAK:
 
@@ -537,7 +584,7 @@ class CScore:
     def get_current_speed_for_last_hour(self):  # (5)
         return self.assembled_speed_for_last_one_hour
 
-    def get_tv_speed_for_five_mins(self): # (6)
+    def get_tv_speed_for_five_mins(self):  # (6)
         return self.assembled_speed_for_last_five_mins
 
     def get_tv_count_day_forecast(self):  # (7)

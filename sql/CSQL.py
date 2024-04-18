@@ -178,7 +178,7 @@ class csql_eng:
                 cur.execute("SET TIME ZONE 'Europe/Moscow'")
             else:
                 cur.execute("SET TIME ZONE 'Asia/Almaty'")
-
+            # cur.execute("SET TIME ZONE 'UTC'")
             self.__db_connect_success = True
             self.__db_handle = connect_handle
             self.__db_data_success = True

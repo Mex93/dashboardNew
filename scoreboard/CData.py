@@ -1,4 +1,4 @@
-from datetime import datetime
+
 
 from scoreboard.enums import LINE_ID, JOB_TIME, JOB_BREAK_ARRAY_DATA
 from scoreboard.common import CCommon
@@ -22,6 +22,7 @@ class CData:
         self.total_smena_delay = 0  # Дневная смена в часах
 
         self.current_job_type = JOB_TYPE.NONE  # Тип смены день ночь
+        self.job_day_delay = 0  # Продолжительность рабочей смены в часах 8-12
         # список с перерывами
         self.break_time_night = tuple()
         # день
@@ -33,7 +34,7 @@ class CData:
         self.start_job_night = "20:00"
         self.end_job_night = "08:00"
 
-    def get_data_for_line(self):
+    def get_data_for_line(self, time_zone: TIME_ZONES):
 
         sql_line_id = CCommon.get_line_id_for_sql(self.current_line_id)
         if sql_line_id:
@@ -42,7 +43,7 @@ class CData:
             try:
                 result = local_sql.connect_to_db(CONNECT_DB_TYPE.LOCAL)
                 sql_handle = local_sql.get_sql_handle()
-                Clog.lprint(f"Подключение к БД(CData): CONNECT_DB_TYPE.LOCAL [sql_handle: {sql_handle}]")
+                Clog.lprint(f"Подключение к БД(CData -> get_data_for_line): CONNECT_DB_TYPE.LOCAL [sql_handle: {sql_handle}]")
                 if result:
                     query_string = (f"SELECT * "
                                     f"FROM {SQL_TABLE_NAME.local_db_plan_table} "
@@ -92,6 +93,7 @@ class CData:
                     break_night_double_len = result[0].get(PLAN_TABLE_FIELDS.fd_brake_double_time_night_len, None)
                     break_night_third_len = result[0].get(PLAN_TABLE_FIELDS.fd_brake_third_time_night_len, None)
 
+                    self.job_day_delay = result[0].get(PLAN_TABLE_FIELDS.fd_job_day_delay, None)
                     # Тип смены день ночь
                     # Меняется в бд для день или ночь
                     # Если выставлен день то ночных смен нет и наоборот
@@ -99,6 +101,7 @@ class CData:
 
                     check_list = (
                         # старт смены и конец - строка
+                        self.job_day_delay,
                         self.start_job_day,
                         self.end_job_day,
                         self.start_job_night,
@@ -135,35 +138,67 @@ class CData:
                             Clog.lprint(f"CData -> get_data_for_line ->  Данные Не получены! ({check_list})")
                             return False
 
-                    self.break_time_day = (
-                        (BREAK_TYPE.FIRST, break_day_one_len * 60, break_day_one_start),
-                        (BREAK_TYPE.EAT, break_day_eat_len * 60, break_day_eat_start),
-                        (BREAK_TYPE.DOUBLE, break_day_double_len * 60, break_day_double_start),
-                        (BREAK_TYPE.LAST, break_day_third_len * 60, break_day_third_start)
-                    )
+                    # #  Конверт в utc
+                    # try:
+                    #     self.start_job_day = CCommon.time_to_utc(self.start_job_day)
+                    #     self.end_job_day = CCommon.time_to_utc(self.end_job_day)
+                    #     self.start_job_night = CCommon.time_to_utc(self.start_job_night)
+                    #     self.end_job_night = CCommon.time_to_utc(self.end_job_night)
+                    #     break_day_one_start = CCommon.time_to_utc(break_day_one_start)
+                    #     break_day_eat_start = CCommon.time_to_utc(break_day_eat_start)
+                    #     break_day_double_start = CCommon.time_to_utc(break_day_double_start)
+                    #     break_day_third_start = CCommon.time_to_utc(break_day_third_start)
+                    #
+                    #     break_night_one_start = CCommon.time_to_utc(break_night_one_start)
+                    #     break_night_eat_start = CCommon.time_to_utc(break_night_eat_start)
+                    #     break_night_double_start = CCommon.time_to_utc(break_night_double_start)
+                    #     break_night_third_start = CCommon.time_to_utc(break_night_third_start)
 
-                    self.break_time_night = (
-                        (BREAK_TYPE.FIRST, break_night_one_len * 60, break_night_one_start),
-                        (BREAK_TYPE.EAT, break_night_eat_len * 60, break_night_eat_start),
-                        (BREAK_TYPE.DOUBLE, break_night_double_len * 60, break_night_double_start),
-                        (BREAK_TYPE.LAST, break_night_third_len * 60, break_night_third_start)
-                    )
+                    # except ValueError:
+                    #     print("Ошибка в конверте дат!")
+                    #     return
+                    if self.job_day_delay == 12:
+                        self.break_time_day = (
+                            (BREAK_TYPE.FIRST, break_day_one_len * 60, break_day_one_start),
+                            (BREAK_TYPE.EAT, break_day_eat_len * 60, break_day_eat_start),
+                            (BREAK_TYPE.DOUBLE, break_day_double_len * 60, break_day_double_start),
+                            (BREAK_TYPE.LAST, break_day_third_len * 60, break_day_third_start)
+                        )
+
+                        self.break_time_night = (
+                            (BREAK_TYPE.FIRST, break_night_one_len * 60, break_night_one_start),
+                            (BREAK_TYPE.EAT, break_night_eat_len * 60, break_night_eat_start),
+                            (BREAK_TYPE.DOUBLE, break_night_double_len * 60, break_night_double_start),
+                            (BREAK_TYPE.LAST, break_night_third_len * 60, break_night_third_start)
+                        )
+                    elif self.job_day_delay == 8:
+                        self.break_time_day = (
+                            (BREAK_TYPE.FIRST, break_day_one_len * 60, break_day_one_start),
+                            (BREAK_TYPE.EAT, break_day_eat_len * 60, break_day_eat_start),
+                            (BREAK_TYPE.DOUBLE, break_day_double_len * 60, break_day_double_start),
+                        )
+
+                        self.break_time_night = (
+                            (BREAK_TYPE.FIRST, break_night_one_len * 60, break_night_one_start),
+                            (BREAK_TYPE.EAT, break_night_eat_len * 60, break_night_eat_start),
+                            (BREAK_TYPE.DOUBLE, break_night_double_len * 60, break_night_double_start),
+                        )
 
                     Clog.lprint(f"CData -> get_data_for_line ->  Данные получены! ({check_list})")
                     return True
 
             except NotConnectToDB as err:
-                Clog.lprint(f"Внимание! Ошибка SQL: NotConnectToDB [{err}]")
+                Clog.lprint(f"Внимание! Ошибка SQL: NotConnectToDB [get_data_for_line] [{err}]")
             except ErrorSQLQuery as err:
-                Clog.lprint(f"Внимание! Ошибка SQL: ErrorSQLQuery [{err}]")
+                Clog.lprint(f"Внимание! Ошибка SQL: ErrorSQLQuery [get_data_for_line] [{err}]")
             except ErrorSQLData as err:
-                Clog.lprint(f"Внимание! Ошибка SQL: ErrorSQLData [{err}]")
+                Clog.lprint(f"Внимание! Ошибка SQL: ErrorSQLData [get_data_for_line] [{err}]")
             except Exception as err:
-                Clog.lprint(f"Внимание! Ошибка SQL: NonType [{err}]")
+                Clog.lprint(f"Внимание! Ошибка SQL: NonType [get_data_for_line] [{err}]")
 
             finally:
                 Clog.lprint(
-                    f"Отключение от БД(CData): CONNECT_DB_TYPE.LOCAL [sql_handle: {local_sql.get_sql_handle()}]")
+                    f"Отключение от БД(CData -> get_data_for_line): CONNECT_DB_TYPE.LOCAL [sql_handle: {local_sql.get_sql_handle()}]")
                 local_sql.disconnect_from_db()
 
     def get_break_delay_time(self, br_type: BREAK_TYPE, job_time: JOB_TYPE):
@@ -228,7 +263,7 @@ class CData:
 
     def get_current_break_time(self, job_time: JOB_TYPE) -> list[int | int] | BREAK_TYPE:
 
-        cdate = datetime.now()
+        cdate = CCommon.get_current_time(self.current_time_zone)
 
         mins = cdate.minute
         hours = cdate.hour
@@ -248,35 +283,43 @@ class CData:
         if buffer_list is None:
             return BREAK_TYPE.NONE
 
-        current_unix_time = CCommon.get_current_unix_time(cdate)
+        current_unix_time = int(cdate.timestamp())
+
         for break_arr in buffer_list:
             start_time = break_arr[BREAK_ARRAY_DATA.START_TIME]
 
-            start_date = cdate.strptime(f"{year}/{month}/{day} {start_time}/{seconds}", "%Y/%m/%d %H:%M/%S")
+            # start_date = cdate.strptime(f"{year}/{month}/{day} {CCommon.utc_to_current_zone_time(start_time, "0300")}/{seconds}", "%Y/%m/%d %H:%M/%S")
+            start_date = cdate.strptime(
+                f"{year}/{month}/{day} {start_time}/{seconds}",
+                "%Y/%m/%d %H:%M/%S")
+
+            # print("BSBGSBSFBFSBB   ", start_date, current_unix_time, CCommon.timestamp_ex(int(start_date.timestamp())))
             # print(start_date)
             if start_date:
-                break_start_time_unix_time = int(start_date.timestamp())
+                break_start_time_unix_time = CCommon.timestamp_ex(int(start_date.timestamp()))
+
                 if break_start_time_unix_time > 0:
                     end_time = int(break_start_time_unix_time + break_arr[BREAK_ARRAY_DATA.DELAY_SEC])
 
                     # print(break_start_time_unix_time, current_unix_time, end_time)
+                    # print("BSBGSBSFBFSBB   ", cdate.timestamp(), break_start_time_unix_time, end_time)
                     if break_start_time_unix_time <= current_unix_time <= end_time:
 
-                        time_for_end = end_time - current_unix_time
-                        if time_for_end < 0:
-                            time_for_end = 0
+                        last_time = current_unix_time - break_start_time_unix_time
+                        if last_time < 0:
+                            last_time = 0
 
-                        return [break_arr[BREAK_ARRAY_DATA.BREAK_TYPE], time_for_end]
+                        return [break_arr[BREAK_ARRAY_DATA.BREAK_TYPE], last_time]
 
         return BREAK_TYPE.NONE
 
     def get_day_total_plane(self):
         return int(self.total_day_plane)
 
-    def get_day_plane_total_speed_for_hour(self, job_time: JOB_TYPE):
+    def get_day_plane_total_speed_for_hour(self, job_time: JOB_TYPE, job_day_delay: int):
         plane = self.total_day_plane
 
-        all_job_time = self.get_all_job_time(job_time)
+        all_job_time = self.get_all_job_time(job_time, job_day_delay)
         speed = 0
 
         if all_job_time > 0:
@@ -284,8 +327,8 @@ class CData:
 
         return int(speed)
 
-    def get_all_job_time(self, job_time: JOB_TYPE):
-        buff = 12 * 3600
+    def get_all_job_time(self, job_time: JOB_TYPE, job_day_delay: int):
+        buff = job_day_delay * 3600
         all_delays = self.get_all_breaks_delay_time(job_time)
         buff -= all_delays
         if buff < 0:
@@ -298,7 +341,7 @@ class CData:
 
     def get_job_time_unix_time(self, job_type: JOB_TIME, job_time: JOB_TYPE):
 
-        cdate = datetime.now()
+        cdate = CCommon.get_current_time(self.current_time_zone)
 
         mins = cdate.minute
         hours = cdate.hour
@@ -311,22 +354,53 @@ class CData:
         start_date = None
         if job_type == JOB_TIME.START:
             if job_time == JOB_TYPE.NIGHT:
-                start_date = cdate.strptime(f"{year}/{month}/{day} {self.start_job_night}/00", "%Y/%m/%d %H:%M/%S")
+                start_date = cdate.strptime(f"{year}/{month}/{day} "
+                                            f"{self.start_job_night}/00", "%Y/%m/%d %H:%M/%S")
+
+                # start_date = cdate.strptime(f"{year}/{month}/{day} "
+                #                             f"{CCommon.utc_to_current_zone_time(self.start_job_night, "0300")}/00",
+                #                             "%Y/%m/%d %H:%M/%S")
 
             elif job_time == JOB_TYPE.DAY:
-                start_date = cdate.strptime(f"{year}/{month}/{day} {self.start_job_day}/00", "%Y/%m/%d %H:%M/%S")
+                # start_date = cdate.strptime(f"{year}/{month}/{day} "
+                #                             f"{CCommon.utc_to_current_zone_time(self.start_job_day, "0300")}/00", "%Y/%m/%d %H:%M/%S")
+
+                start_date = cdate.strptime(f"{year}/{month}/{day} "
+                                            f"{self.start_job_day}/00",
+                                            "%Y/%m/%d %H:%M/%S")
 
         elif job_type == JOB_TIME.END:
+
+            time_str = None
+            if self.job_day_delay == 8:
+                if job_time == JOB_TYPE.NIGHT:
+                    time_str = "05:00"
+                elif job_time == JOB_TYPE.DAY:
+                    time_str = "17:00"
+            elif self.job_day_delay == 12:
+                if job_time == JOB_TYPE.NIGHT:
+                    time_str = "08:00"
+                elif job_time == JOB_TYPE.DAY:
+                    time_str = "20:00"
+
             if job_time == JOB_TYPE.NIGHT:
-                start_date = cdate.strptime(f"{year}/{month}/{day} {self.start_job_day}/00", "%Y/%m/%d %H:%M/%S")
+                # start_date = cdate.strptime(f"{year}/{month}/{day} "
+                #                             f"{CCommon.utc_to_current_zone_time(time_str, "0300")}/00", "%Y/%m/%d %H:%M/%S")
+                start_date = cdate.strptime(f"{year}/{month}/{day} "
+                                             f"{time_str}/00", "%Y/%m/%d %H:%M/%S")
 
             elif job_time == JOB_TYPE.DAY:
-                start_date = cdate.strptime(f"{year}/{month}/{day} {self.start_job_night}/00", "%Y/%m/%d %H:%M/%S")
+                # start_date = cdate.strptime(f"{year}/{month}/{day} "
+                #                             f"{CCommon.utc_to_current_zone_time(time_str, "0300")}/00", "%Y/%m/%d %H:%M/%S")
+
+                start_date = cdate.strptime(f"{year}/{month}/{day} "
+                                            f"{time_str}/00",
+                                            "%Y/%m/%d %H:%M/%S")
         if start_date is None:
             Clog.lprint(
                 f"Ошибка!!! get_job_time_unix_time -> start_date -> None")
             return
-        start_job_time = int(start_date.timestamp())
+        start_job_time = CCommon.timestamp_ex(int(start_date.timestamp()))
         if start_job_time < 0:
             start_job_time = 0
 
@@ -337,7 +411,7 @@ class CData:
         string = self.get_break_start_string_time(break_type, job_time)
         if isinstance(string, str):
 
-            cdate = datetime.now()
+            cdate = CCommon.get_current_time(self.current_time_zone)
 
             mins = cdate.minute
             hours = cdate.hour
@@ -347,7 +421,14 @@ class CData:
             month = cdate.month
             year = cdate.year
 
-            start_date = int(cdate.strptime(f"{year}/{month}/{day} {string}/00", "%Y/%m/%d %H:%M/%S").timestamp())
+            # start_date = int(cdate.strptime(f"{year}/{month}/{day} {CCommon.utc_to_current_zone_time(string, "0300")}/00", "%Y/%m/%d %H:%M/%S").timestamp())
+            start_date = int(
+                cdate.strptime(f"{year}/{month}/{day} {string}/00",
+                               "%Y/%m/%d %H:%M/%S").timestamp())
+
+            start_date = CCommon.timestamp_ex(start_date)
+
+            # print("eqifuheqwuofgehewqg", CCommon.utc_to_current_zone_time(string, "0300"))
             if start_date < 0:
                 start_date = 0
 
@@ -361,13 +442,22 @@ class CData:
         """ Вычисляет компенсацию времени перерывов отнимая её от времени старта смены
         до текущей или от конца смены до текущей"""
 
-        current_unix_time = CCommon.get_current_unix_time()
+        current_unix_time = CCommon.get_current_time(self.current_time_zone).timestamp()
 
-        breaks = [BREAK_TYPE.FIRST,
-                  BREAK_TYPE.EAT,
-                  BREAK_TYPE.DOUBLE,
-                  BREAK_TYPE.LAST
-                  ]
+        breaks = None
+        if self.job_day_delay == 12:
+            breaks = [
+                BREAK_TYPE.FIRST,
+                BREAK_TYPE.EAT,
+                BREAK_TYPE.DOUBLE,
+                BREAK_TYPE.LAST
+                      ]
+        elif self.job_day_delay == 8:
+            breaks = [
+                BREAK_TYPE.FIRST,
+                BREAK_TYPE.EAT,
+                BREAK_TYPE.DOUBLE
+            ]
 
         time_job_start = self.get_job_time_unix_time(JOB_TIME.START, job_time)  # unix time
 
@@ -384,13 +474,18 @@ class CData:
             if isinstance(br_params, list):
 
                 start = br_params[JOB_BREAK_ARRAY_DATA.START]
-                # end = br_params[JOB_BREAK_ARRAY_DATA.END]
+                end = br_params[JOB_BREAK_ARRAY_DATA.END]
                 delay = br_params[JOB_BREAK_ARRAY_DATA.DELAY]
 
                 # start to now
-                if current_unix_time > start:
+                if start < current_unix_time < end:
+                    start_to_now_sc -= current_unix_time - start  # отнимаем сколько прошло
+                    if start_to_now_sc < 0:
+                        start_to_now_sc = 0
+                elif current_unix_time > end:
                     start_to_now_sc -= delay
                 # now to end
+
                 if current_unix_time < start:
                     time_to_end_smena_sc -= delay
         # print(start_to_now_sc, time_to_end_smena_sc)
@@ -402,7 +497,7 @@ class CData:
             br_params = self.get_break_unit_time(break_type, job_time)
             if isinstance(br_params, list):
 
-                current_unix_time = CCommon.get_current_unix_time()
+                current_unix_time = CCommon.get_current_time(self.current_time_zone).timestamp()
 
                 start = br_params[JOB_BREAK_ARRAY_DATA.START]
                 end = br_params[JOB_BREAK_ARRAY_DATA.END]
