@@ -281,8 +281,8 @@ class CScore:
                         start_date = cdate.strptime(f"{year}/{month}/{day} {cdata_unit.start_job_night}:00",
                                                     "%Y/%m/%d %H:%M:%S")
                     if start_date is not None:
-                        if ((job_time == JOB_TYPE.DAY and not CCommon.is_current_day_time()) or
-                                (job_time == JOB_TYPE.NIGHT and CCommon.is_current_day_time())):
+                        if ((job_time == JOB_TYPE.DAY and not CCommon.is_current_day_time(self.current_time_zone)) or
+                                (job_time == JOB_TYPE.NIGHT and CCommon.is_current_day_time(self.current_time_zone))):
 
                             start_date = start_date - timedelta(days=1)
                             mins_correct = start_date.minute
@@ -369,7 +369,7 @@ class CScore:
         # расчёт типа смены[день ночь] и статуса[перерыв, работа итд]
         if current_job_time == JOB_TYPE.DAY:
 
-            if not CCommon.is_current_day_time():
+            if not CCommon.is_current_day_time(self.current_time_zone):
                 if self.assembled_speed_for_last_one_hour == 0:
                     self.current_job_status = JOB_STATUS.JOB_END
                 else:
@@ -380,7 +380,7 @@ class CScore:
         elif current_job_time == JOB_TYPE.NIGHT:
             self.current_job_status = JOB_STATUS.JOB_IN_PROCESS
 
-            if CCommon.is_current_day_time():
+            if CCommon.is_current_day_time(self.current_time_zone):
                 if self.assembled_speed_for_last_one_hour == 0:
                     self.current_job_status = JOB_STATUS.JOB_END
                 else:

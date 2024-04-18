@@ -16,8 +16,8 @@ class CCommon:
     #     unix_time = obj.now(timezone.utc)
     #     return int(unix_time.timestamp())   # в utc- (3600 * 3)
 
-    @staticmethod
-    def get_current_time(time_zone: TIME_ZONES) -> datetime:
+    @classmethod
+    def get_current_time(cls, time_zone: TIME_ZONES) -> datetime:
         hours_add = 0
         if time_zone == TIME_ZONES.RUSSIA:
             hours_add = 3
@@ -95,13 +95,13 @@ class CCommon:
 
         return res
 
-    @staticmethod
-    def is_current_day_time() -> bool:
+    @classmethod
+    def is_current_day_time(cls, time_zone: TIME_ZONES) -> bool:
         """
             Проверка на часы работы линии. Учитывается день
         :return:
         """
-        cdate = datetime.now(timezone.utc)
+        cdate = cls.get_current_time(time_zone)
         # mins = current_datetime.min
         hours = cdate.hour
 
