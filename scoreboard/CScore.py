@@ -361,14 +361,12 @@ class CScore:
         # code
 
         self.total_day_plan = data_unit.get_day_total_plane()  # Дневной план
-        self.total_day_plan_speed = data_unit.get_day_plane_total_speed_for_hour(
-            current_job_time, data_unit.job_day_delay)  # Расчётная скорость телеков в час
 
         self.get_hours_score(DATA_SCORE_TYPE.ONE_HOUR_DATA, break_list, data_unit)
 
         # расчёт типа смены[день ночь] и статуса[перерыв, работа итд]
         if current_job_time == JOB_TYPE.DAY:
-
+            #  Может как то лучше сделать тут расчёт >?
             if not CCommon.is_current_day_time(self.current_time_zone):
                 if self.assembled_speed_for_last_one_hour == 0:
                     self.current_job_status = JOB_STATUS.JOB_END
@@ -412,6 +410,9 @@ class CScore:
             start_to_now_compensace = compensace_list[0]
             # время от старта смены и до текущего момента с компенсацией перерыва
             now_to_end_compensace = compensace_list[1]  # время от конца смены до текущего момента
+
+            self.total_day_plan_speed = data_unit.get_day_plane_total_speed_for_hour(
+                current_job_time, data_unit.job_day_delay)  # Расчётная скорость телеков в час
 
             # Компенсация времени перерыва если он начат
 
