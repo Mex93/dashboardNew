@@ -25,6 +25,9 @@ def getsize():
 @app.route('/sb/<int:gmt_time>/<int:changed_line_id>')
 def scoreboard(gmt_time, changed_line_id):
     return render_template('scoreboard.html', time_gmt=gmt_time, line_id=changed_line_id)
+@app.route('/kz')
+def get_kz():
+    return render_template('scoreboard.html', time_gmt="2", line_id="5")
 
 
 @app.route('/engine_scripts/py/launch_scripts/scoreboard_get_stats.py', methods=['GET', 'POST'])
@@ -120,16 +123,12 @@ def get_result_scoreboard_json(line_id: str, ctime_gmt: str) -> str:
         count_tv_on_5min_css = css['count_tv_on_5min_css']
         count_tv_forecast_on_day_css = css['count_tv_forecast_on_day_css']
 
-        cdate = datetime.now()
-
-        mins = cdate.minute
-        hours = cdate.hour
-
         completedjson = json.dumps({
             'name': ceh_name,
             'status_txt': job_status_str,
-            'ctime': f"{hours}:{mins}",
             'title': title_name,
+            'time_mins': score_unit.get_mins(),
+            'time_hours': score_unit.get_hours(),
             'plan': count_all_plan,
             'TV': count_all_fact,
             'opt_speed': count_plan_on_hour,
@@ -150,6 +149,8 @@ def get_result_scoreboard_json(line_id: str, ctime_gmt: str) -> str:
     else:  # Ошибка
         completedjson = json.dumps({
             'name': ceh_name,
+            'time_mins': "-",
+            'time_hours': "-",
             'status_txt': job_status_str,
             'title': title_name,
             'checked_data': -1,

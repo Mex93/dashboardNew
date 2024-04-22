@@ -6,12 +6,9 @@
   <component name="ChangeListManager">
     <list default="true" id="0763ca10-79a3-416a-88f1-f9ae49a0d658" name="Changes" comment="fix bugs">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/log/Clog.py" beforeDir="false" afterPath="$PROJECT_DIR$/log/Clog.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/app.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/scoreboard/CData.py" beforeDir="false" afterPath="$PROJECT_DIR$/scoreboard/CData.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/scoreboard/CScore.py" beforeDir="false" afterPath="$PROJECT_DIR$/scoreboard/CScore.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scoreboard/common.py" beforeDir="false" afterPath="$PROJECT_DIR$/scoreboard/common.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/sql/CSQL.py" beforeDir="false" afterPath="$PROJECT_DIR$/sql/CSQL.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/sql/sql_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/sql/sql_data.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -43,7 +40,7 @@
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
     "Python.CData.executor": "Run",
-    "Python.CScore.executor": "Run",
+    "Python.CScore.executor": "Debug",
     "Python.app.executor": "Run",
     "Python.config.executor": "Run",
     "Python.dashboardNew.executor": "Run",
@@ -53,7 +50,13 @@
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "git-widget-placeholder": "master",
     "ignore.virus.scanning.warn.message": "true",
-    "last_opened_file_path": "C:/Users/Ryazanov/PycharmProjects/AssyProductionWorkplace"
+    "last_opened_file_path": "C:/Users/Ryazanov/PycharmProjects/AssyProductionWorkplace",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
   <component name="RecentsManager">
@@ -131,18 +134,6 @@
       </runOnlyEnvs>
       <method v="2" />
     </configuration>
-    <recent_temporary>
-      <list>
-        <item itemvalue="Python.CScore" />
-      </list>
-    </recent_temporary>
-  </component>
-  <component name="SharedIndexes">
-    <attachedChunks>
-      <set>
-        <option value="bundled-python-sdk-d68999036c7f-d3b881c8e49f-com.jetbrains.pycharm.community.sharedIndexes.bundled-PC-233.14475.56" />
-      </set>
-    </attachedChunks>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
@@ -152,6 +143,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1712830858272</updated>
+      <workItem from="1713773278212" duration="3006000" />
     </task>
     <task id="LOCAL-00001" summary="first">
       <option name="closed" value="true" />
@@ -241,8 +233,27 @@
       <option name="project" value="LOCAL" />
       <updated>1713252113700</updated>
     </task>
-    <option name="localTasksCounter" value="12" />
+    <task id="LOCAL-00012" summary="fix bugs">
+      <option name="closed" value="true" />
+      <created>1713440619030</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1713440619030</updated>
+    </task>
+    <task id="LOCAL-00013" summary="fix bugs">
+      <option name="closed" value="true" />
+      <created>1713440903230</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1713440903230</updated>
+    </task>
+    <option name="localTasksCounter" value="14" />
     <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
     <option name="TAB_STATES">
@@ -259,16 +270,5 @@
     <MESSAGE value="first" />
     <MESSAGE value="fix bugs" />
     <option name="LAST_COMMIT_MESSAGE" value="fix bugs" />
-  </component>
-  <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <default-breakpoints>
-        <breakpoint type="python-exception">
-          <properties notifyOnTerminate="true" exception="BaseException">
-            <option name="notifyOnTerminate" value="true" />
-          </properties>
-        </breakpoint>
-      </default-breakpoints>
-    </breakpoint-manager>
   </component>
 </project>

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="RU">
+	<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf8">
+	<link rel="stylesheet" type="text/css" href="/static/css/scoreboard/tv.css">
+
+	<link type="image/x-icon" href="/static/img/logo.ico" rel="shortcut icon">
+	<link type="Image/x-icon" href="/static/img/logo.ico" rel="icon">
+
+	<script
+		src="https://code.jquery.com/jquery-3.7.1.min.js"
+		integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
+		crossorigin="anonymous"></script>
+
+	<title>Цех -</title>
+	</head>
+
+	<body>
+	<header>
+		<div id="time">
+			<span id="hours">-</span> : <span id="min">-</span> <span id="sec"></span>
+		</div>
+		<div id="status">Нет данных смены</div>
+		<div id="name">Цех -</div>
+	</header>
+
+
+	<section id="plan-fact">
+		<table>
+			<tbody>
+			<tr>
+				<th>ПЛАН</th>
+				<th>ФАКТ</th>
+			</tr>
+			<tr>
+				<td><span id="shift_plan">-</span> шт</td>
+				<td><span id="tv_count">-</span> шт</td>
+			</tr>
+			<tr>
+				<td><span id="opt_speed_for_shift">-</span> шт/час</td>
+				<td><span id="average_speed" class="value_NI">-</span> шт/час</td>
+			</tr>
+		</tbody></table>
+	</section>
+
+	<section id="block-data">
+			<div id="sph">За час: <span id="tv_per_last_hour" class="value_NI">-</span> шт</div>
+			<div id="aspt">За 5 мин: <span id="tv_per_last_5min" class="value_NI">-</span> шт</div>
+			<div id="tfc">Прогноз: <span id="tv_forecast_total" class="value_NI">-</span> шт</div>
+	</section>
+
+	<p id="line_id" hidden="">{{ line_id }}</p>
+	<p id="time_gmt" hidden="">{{ time_gmt }}</p>
+
+	<script type = "module" src="/static/js/scorebar_client.js"></script>
+
+	</body></html>

@@ -1,0 +1,139 @@
+body{
+	background-color: rgba(90, 91, 95 , 0.9);
+    background: #222;
+	color: white;
+	overflow: hidden;
+	margin: 0px;
+}
+
+
+.canvas_size_one {
+    min-width: 100vw;
+    min-height: 100vh;
+}
+.canvas_size_two {
+    min-width: 100vw;
+    min-height: 50vh;
+}
+
+.canvas_size_four {
+    min-width: 50vw;
+    min-height: 50vh;
+}
+
+.canvas_colors {
+   background-color: rgba(90, 91, 95 , 0.9);
+   background: #222;
+}
+
+/*two lines*/
+.graff_container_two_lines {
+display: grid;
+  grid-auto-flow: row dense;
+  grid-template-columns: 100%;
+  grid-template-rows: 50% 50%;
+  gap: 0% 0%;
+  grid-template-areas:
+    "gra_one"
+    "gra_two";
+  align-content: space-evenly;
+  justify-items: stretch;
+  align-items: stretch;
+}
+
+
+
+/*one*/
+.graff_container_one_lines {
+  display: grid;
+  grid-template-columns: 100%;
+  grid-template-rows: 100%;
+  gap: 0px 0px;
+  grid-template-areas:
+    "gra_one";
+  align-content: space-evenly;
+  justify-items: stretch;
+  align-items: stretch;
+
+}
+/*tri*/
+.chart-container_tris {
+    display: flex;
+    justify-content: space-between;
+}
+
+.chart_unit_tris {
+    width: calc(50vw - 10px);
+}
+
+#chart_tris_footer {
+    width: 100vw;
+}
+/*four*/
+.graff_container_fours {
+  display: grid;
+  grid-auto-flow: row dense;
+  grid-template-columns: 50% 50%;
+  grid-template-rows: 50% 50%;
+  gap: 0px 0px;
+  grid-template-areas:
+    "gra_one gra_two"
+    "gra_tri gra_fours";
+     align-content: space-evenly;
+  justify-items: stretch;
+  align-items: stretch;
+}
+.graff_container_alls {
+ display: grid;
+  grid-template-columns: 100%;
+  grid-template-rows: 50% 50% 50% 50% 50%;
+  gap: 0px 0px;
+  grid-template-areas:
+    "gra_one"
+    "gra_two"
+    "gra_tri"
+    "gra_fours"
+    "gra_five";
+     align-content: space-evenly;
+  justify-items: stretch;
+  align-items: stretch;
+}
+/*columns*/
+.gra_one {
+    grid-area: gra_one;
+}
+.gra_two {
+    grid-area: gra_two;
+}
+.gra_tri {
+    grid-area: gra_tri;
+}
+.gra_fours {
+    grid-area: gra_fours;
+}
+.gra_five {
+    grid-area: gra_five;
+}
+
+
+.reload_dialog {
+    display: block;
+    position: absolute;
+
+    top: 30%;
+    left: 20%;
+	border-radius: 43px;
+    /*margin: 0 auto;*/
+    width: 60%;
+    height: 60%;
+    text-align: center;
+}
+.reload_dialog.text {
+    display: block;
+    background: rgba(14,67,190,0.3);
+	color: rgb(189,186,186);
+    position: center;
+    padding: 20px 20px 20px 20px;
+    font-size: 1vw;
+	height: 30%;
+}

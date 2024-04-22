@@ -1,0 +1,138 @@
+
+
+<!DOCTYPE html>
+
+<html lang="RU">
+<head>
+<meta charset="utf8" />
+	<link rel="stylesheet" type="text/css" href="/static/css/main/style.css">
+    <link type="image/x-icon" href="/static/img/logo.ico" rel="shortcut icon">
+	<link type="Image/x-icon" href="/static/img/logo.ico" rel="icon">
+
+<!--script src="js/index.js"></script-->
+<title>Статистика по цехам «КВАНТ»</title>
+</head>
+
+<header>
+
+
+</header>
+
+<body>
+
+
+<span id = "canvas_main_one" style="display: none;">
+    <canvas id="chart_0"> </canvas>
+</span>
+<span id = "canvas_main_two" style="display: none;">
+    <canvas id="chart_1"> </canvas>
+</span>
+<span id = "canvas_main_tri" style="display: none;">
+    <canvas id="chart_2"> </canvas>
+</span>
+<span id = "canvas_main_four" style="display: none;">
+    <canvas id="chart_3"> </canvas>
+</span>
+
+
+
+<span id = "lines_count_one" style="display: none;">
+    <div class = "canvas_colors canvas_size_one">
+        <span id = "graf_1_1">
+        </span>
+    </div>
+</span>
+
+<span id = "lines_count_two" style="display: none;">
+    <div class = "canvas_colors canvas_size_two">
+        <span id = "graf_2_1">
+        </span>
+         <span id = "graf_2_2">
+        </span>
+    </div>
+</span>
+
+<span id = "lines_count_tris" style="display: none;">
+    <div class = "chart-container_tris canvas_colors">
+        <div class="chart_unit_tris">
+            <span id = "graf_3_1">
+            </span>
+        </div>
+         <div class="chart_unit_tris">
+            <span id = "graf_3_2">
+            </span>
+        </div>
+    </div>
+     <div class="chart_tris_footer canvas_colors">
+            <span id = "graf_3_3">
+            </span>
+     </div>
+</span>
+
+<span id = "lines_count_fours" style="display: none;">
+    <div class="graff_container_fours canvas_colors" >
+      <div class="gra_one">
+           <div class = "canvas_size_four">
+           <span id = "graf_4_1" style="display: none;">
+            </span>
+          </div>
+      </div>
+      <div class="gra_two">
+           <div class = "canvas_size_four">
+            <span id = "graf_4_2" style="display: none;">
+            </span>
+          </div>
+      </div>
+      <div class="gra_tri">
+           <div class = "canvas_size_four">
+            <span id = "graf_4_3" style="display: none;">
+            </span>
+          </div>
+      </div>
+      <div class="gra_fours">
+          <div class = "canvas_size_four">
+            <span id = "graf_4_4" style="display: none;">
+            </span>
+          </div>
+      </div>
+    </div>
+</span>
+
+<span id = 'reload_dialog' style="display: none;">
+    <div class = 'reload_dialog text'>
+        <h2>Нет данных для построения графиков</h2><br>
+        <h2>Будет выполнена автоматическая перезагрузка страницы в течении нескольких минут</h2>
+    </div>
+</span>
+
+<span id = 'getdate_dialog' style="display: none;">
+    <div class = 'reload_dialog text'>
+        <h2>Получение данных</h2><br>
+        <h2>Пожалуйста, подождите...</h2>
+    </div>
+</span>
+
+<p id="time_gmt" hidden="">{{ time_gmt }}</p>
+<p id="html_type" hidden="">vrn</p>
+
+
+</body>
+  <script
+	  src="https://code.jquery.com/jquery-3.7.1.min.js"
+	  integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
+	  crossorigin="anonymous"></script>
+
+	<script src="https://cdn.jsdelivr.net/npm/chart.js@3.0.0/dist/chart.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+
+    <script type="text/javascript">
+
+    </script>
+
+<script src="/static/js/libs/chart/dist/chart.umd.js"></script>
+<script src="/static/js/libs/chartjs-plugin-annotation/dist/chartjs-plugin-annotation.min.js"></script>
+<script type = "module" src="/static/js/dashboard_client.js"></script>
+
+
+
+</html>

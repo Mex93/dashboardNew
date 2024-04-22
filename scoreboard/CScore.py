@@ -50,6 +50,18 @@ class CScore:
 
         self.count_tv_forecast_on_day_css = ""  # Прогноз за день
 
+    def get_mins(self):
+        return self.get_time()[1]
+
+    def get_hours(self):
+        return self.get_time()[0]
+
+    def get_time(self):
+        cdate = CCommon.get_current_time(self.current_time_zone)
+        hours = cdate.hour
+        mins = cdate.minute
+        return [hours, mins]
+
     def __get_12hours_data(self, cdata_unit: CData):
 
         sql_line_id = CCommon.get_line_id_for_sql(self.current_line)
@@ -542,7 +554,7 @@ class CScore:
 
     def get_ceh_name(self):
         if self.current_line == LINE_ID.LINE_KZ_ONE:
-            return f"Цех №: Казахстан"
+            return f"Цех №: 5"
         else:
             sql_line_id = CCommon.get_line_id_for_sql(self.current_line)
 

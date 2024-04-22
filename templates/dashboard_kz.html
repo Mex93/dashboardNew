@@ -1,0 +1,69 @@
+
+
+<!DOCTYPE html>
+
+<html lang="RU">
+<head>
+<meta charset="utf8" />
+	<link rel="stylesheet" type="text/css" href="/static/css/main/style.css">
+    <link type="image/x-icon" href="/static/img/logo.ico" rel="shortcut icon">
+	<link type="Image/x-icon" href="/static/img/logo.ico" rel="icon">
+
+<!--script src="js/index.js"></script-->
+<title>Статистика по цехам «КВАНТ»</title>
+</head>
+
+<header>
+
+
+</header>
+
+<body style = "overflow: visible;">
+
+<span id = "lines_count_one">
+     <div class = "canvas_size_one">
+         <div id = "canvas_main_one">
+             <canvas id="chart_0"> </canvas>
+        </div>
+     </div>
+</span>
+
+
+<span id = 'reload_dialog' style="display: none;">
+    <div class = 'reload_dialog text'>
+        <h2>Нет данных для построения графиков</h2><br>
+        <h2>Будет выполнена автоматическая перезагрузка страницы в течении нескольких минут
+            <br>Отсутствие данных может говорить об отсутствии сборки на линии за сегодня.</h2>
+    </div>
+</span>
+
+<span id = 'getdate_dialog' style="display: none;">
+    <div class = 'reload_dialog text'>
+        <h2>Получение данных</h2><br>
+        <h2>Пожалуйста, подождите...</h2>
+    </div>
+</span>
+
+<p id="time_gmt" hidden="">{{ time_gmt }}</p>
+<p id="html_type" hidden="">kz</p>
+
+</body>
+  <script
+	  src="https://code.jquery.com/jquery-3.7.1.min.js"
+	  integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
+	  crossorigin="anonymous"></script>
+
+	<script src="https://cdn.jsdelivr.net/npm/chart.js@3.0.0/dist/chart.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+
+    <script type="text/javascript">
+
+    </script>
+
+<script src="/static/js/libs/chart/dist/chart.umd.js"></script>
+<script src="/static/js/libs/chartjs-plugin-annotation/dist/chartjs-plugin-annotation.min.js"></script>
+<script type = "module" src="/static/js/dashboard_client.js"></script>
+
+
+
+</html>

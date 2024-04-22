@@ -171,7 +171,7 @@ class CData:
                             (BREAK_TYPE.DOUBLE, break_night_double_len * 60, break_night_double_start),
                             (BREAK_TYPE.LAST, break_night_third_len * 60, break_night_third_start)
                         )
-                    elif self.job_day_delay == 8:
+                    elif self.job_day_delay == 9:
                         self.break_time_day = (
                             (BREAK_TYPE.FIRST, break_day_one_len * 60, break_day_one_start),
                             (BREAK_TYPE.EAT, break_day_eat_len * 60, break_day_eat_start),
@@ -372,7 +372,7 @@ class CData:
         elif job_type == JOB_TIME.END:
 
             time_str = None
-            if self.job_day_delay == 8:
+            if self.job_day_delay == 9:
                 if job_time == JOB_TYPE.NIGHT:
                     time_str = "05:00"
                 elif job_time == JOB_TYPE.DAY:
@@ -452,7 +452,7 @@ class CData:
                 BREAK_TYPE.DOUBLE,
                 BREAK_TYPE.LAST
                       ]
-        elif self.job_day_delay == 8:
+        elif self.job_day_delay == 9:
             breaks = [
                 BREAK_TYPE.FIRST,
                 BREAK_TYPE.EAT,

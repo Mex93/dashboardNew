@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="RU">
+<head>
+<!--script src="js/index.js"></script-->
+    <title>Статистика по цехам «КВАНТ»</title>
+
+    <link type="image/x-icon" href="/static/img/logo.ico" rel="shortcut icon">
+	<link type="Image/x-icon" href="/static/img/logo.ico" rel="icon">
+
+</head>
+
+<header>
+
+
+</header>
+
+<body>
+  <div style="container">
+    <div align="center">
+      <h1>Запрашиваемая страница не найдена!<br>"<a href="#"><span id = "current_page"> </span></a>"</h1>
+      <img src="/static/img/404.png">
+    </div>
+
+    <div align="center">
+      <h3>Доступные ссылки:</h3>
+      <div>
+        <h2><a href="sb/1/1">Табло первой линии</a><br>
+        <a href="db_all/1">Дашборд всех линий</a><br>
+        <a href="db_vrn/1">Дашборд только Воронеж</a><br></h2>
+      </div>
+    </div>
+  </div>
+
+</body>
+      <script
+        src="https://code.jquery.com/jquery-3.7.1.min.js"
+        integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
+        crossorigin="anonymous">
+      </script>
+     <script type="text/javascript">
+        let current_href = window.location.href;
+        let element = document.getElementById("current_page");
+        if(element !== null)
+        {
+           element.innerHTML = current_href;
+        }
+    </script>
+</html>

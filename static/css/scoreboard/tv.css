@@ -1,0 +1,132 @@
+/*
+    --blue: #4470c3;
+    --indigo: #3559b6;
+    --purple: #6f42c1;
+    --pink: #e83e8c;
+    --red: #e51937;
+    --orange: #fd7e14;
+    --yellow: #ffc107;
+    --green: #28a745;
+    --teal: #20c997;
+    --cyan: #17a2b8;
+    --gray: #868e96;
+    --gray-dark: #11172b;
+    --primary: #4470c3;
+    --secondary: #7c828a;
+    --success: #28a745;
+    --info: #17a2b8;
+    --warning: #ffc107;
+    --danger: #e51937;
+    --light: #f8f9fa;
+    --dark: #11172b;
+    --secondary-cta: #0b1f66;
+    --white: #fff;
+    --dark-footer: #10172e
+	--font-family: 'Roboto Condensed', Montserrat, 'Merriweather Sans',  'Work Sans', sans-serif;
+*/
+html{
+	font-family: Arial;
+	background-color: #0d1c45;
+	color: #fff;
+	font-size: 3vw;
+	text-shadow: 3px 4px 5px #08132e;
+	height: 100wh;
+}
+body{	
+	margin: 0px;
+	padding: 0px;
+	width: 100%;
+	overflow: hidden;
+
+}
+header{
+	background-color: #050c1e;
+	display: block;
+	height: 7vh;
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	padding: 1vh 1.5vw;
+	font-size: 3.5vw;
+	justify-content: space-between;
+}
+
+#time{
+	font-weight: 600;
+	--float: left;	
+	--margin-right: 3vw; 
+	margin-left: 2%;
+}
+#status{
+	--float: left;
+
+}
+#name{
+	--float: right;
+}
+
+#plan-fact{
+	background-color: #113071;
+	box-shadow: 5px 5px 5px #08132e;
+	padding: 0vh 0vw;
+}
+#plan-fact table{
+	width: 100%;
+	border: none;
+	text-align: left;
+	margin-left: 2%;
+}
+#plan-fact th{
+	font-size: 3vw;
+}
+
+#plan-fact table td, th{
+	padding: 1.95vh 0.2vw;	
+}
+#plan-fact table span{
+	font-size: 15.0vw;
+	font-weight: 550;
+}
+#block-data{
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	--display: block;
+	height: 7vh;
+
+	padding: 0vh 0;
+	justify-content: space-between;
+	margin-left: 2%;
+	margin-right: 2%;
+}
+#sph{--float: left; --margin-right: 5vw;}
+#aspt{--float: left;}
+#tfc{--float: right;}
+#block-data span{
+	font-size: 5.5vw;
+	font-weight: 550;
+}
+
+.value_XL{
+	color: #1bbbff;
+}
+.value_L{
+	color: #28a745;
+}
+.value_M{
+	color: #ffc107;
+}
+.value_S{
+	color: #fd7e14;
+}
+.value_XS{
+	color: #e51937;
+}
+.value_NI{
+	color: #C0C0C0;
+}
+
+.chart-container {
+	width:60% !important;
+	height:60% !important;
+}
