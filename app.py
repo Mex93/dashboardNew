@@ -9,10 +9,7 @@ app.config['TESTING'] = True
 app.config['WTF_CSRF_ENABLED'] = True
 debug = False
 
-MAX_LINES = len(LINE_DATA)
-lines_data = list()  # список со словарями данных каждой из линий
-lines_update_time = list()  # список unix tie
-
+load = 0
 
 @app.route('/logo.ico')
 def favicon():
@@ -42,13 +39,22 @@ def scorebar():
 
     clineid = request.args['cline_id']
 
+    global load
+    if load == 0:
+        Lines(1, LINE_DATA.LINE_VRN_0, "1")
+        Lines(2, LINE_DATA.LINE_VRN_1, "2")
+        Lines(3, LINE_DATA.LINE_VRN_2, "3")
+        Lines(4, LINE_DATA.LINE_VRN_3, "4")
+
+        Lines(5, LINE_DATA.LINE_KZ_0, "5")
+        load = 1
+
     lines_list_unit = Lines.get_lines_list()
 
     for current_unit in lines_list_unit:
         if current_unit.get_line_id_str() == clineid:
-            cunix_time = get_current_unix_time()
 
-            if current_unit.get_time() > cunix_time:
+            if current_unit.get_time() > get_current_unix_time():
                 return current_unit.get_data()
             else:
                 current_unit.update_time()
@@ -57,6 +63,16 @@ def scorebar():
                 current_unit.update_data(result)
                 return result
 
+    return json.dumps({
+            'name': "Цех: -",
+            'time_mins': "-",
+            'time_hours': "-",
+            'status_txt': "Error Check Data...",
+            'title': "Цех: -",
+            'checked_data': -1,
+            'time_gmt': "0300",
+            'error': f"Error Load Data(Error name do Not detect)",
+        })
 
 from scoreboard.CScore import CScore
 from scoreboard.common import CCommon
@@ -284,10 +300,5 @@ def get_current_unix_time() -> int:
 
 
 if __name__ == "__main__":
-    Lines(1, LINE_DATA.LINE_VRN_0, "1")
-    Lines(2, LINE_DATA.LINE_VRN_1, "2")
-    Lines(3, LINE_DATA.LINE_VRN_2, "3")
-    Lines(4, LINE_DATA.LINE_VRN_3, "4")
 
-    Lines(5, LINE_DATA.LINE_KZ_0, "5")
     app.run(debug=False)
