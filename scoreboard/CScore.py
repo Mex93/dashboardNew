@@ -1,6 +1,6 @@
 from datetime import timedelta
 
-from scoreboard.enums import JOB_TYPE, JOB_STATUS, LINE_ID, BREAK_TYPE, DATA_SCORE_TYPE
+from scoreboard.enums import JOB_TYPE, JOB_STATUS, LINE_ID, BREAK_TYPE, DATA_SCORE_TYPE, JOB_TIME
 
 from sql.enums import CONNECT_DB_TYPE, TIME_ZONES
 from sql.CSQL import NotConnectToDB, ErrorSQLQuery, ErrorSQLData
@@ -375,28 +375,44 @@ class CScore:
             self.total_day_plan = data_unit.get_day_total_plane()  # Дневной план
 
             if self.get_hours_score(DATA_SCORE_TYPE.ONE_HOUR_DATA, break_list, data_unit) is True:
+                current_unix_time = int(CCommon.get_current_time(self.current_time_zone).timestamp())
+                unix_time_job_end = data_unit.get_job_time_unix_time(JOB_TIME.END, current_job_time)
 
                 # расчёт типа смены[день ночь] и статуса[перерыв, работа итд]
                 if current_job_time == JOB_TYPE.DAY:
                     #  Может как то лучше сделать тут расчёт >?
-                    if not CCommon.is_current_day_time(self.current_time_zone):
+                    self.current_job_status = JOB_STATUS.JOB_IN_PROCESS
+
+                    # todo посмотрел, вроде работает верно
+                    # print(unix_time, time_job_end)
+                    # 1714665263 1714669200
+
+                    if current_unix_time > unix_time_job_end:
                         if self.assembled_speed_for_last_one_hour == 0:
                             self.current_job_status = JOB_STATUS.JOB_END
-                        else:
-                            self.current_job_status = JOB_STATUS.JOB_IN_PROCESS
-                    else:
-                        self.current_job_status = JOB_STATUS.JOB_IN_PROCESS
+
+                    # if not CCommon.is_current_day_time(self.current_time_zone):
+                    #     if self.assembled_speed_for_last_one_hour == 0:
+                    #         self.current_job_status = JOB_STATUS.JOB_END
+                    #     else:
+                    #         self.current_job_status = JOB_STATUS.JOB_IN_PROCESS
+                    # else:
+                    #     self.current_job_status = JOB_STATUS.JOB_IN_PROCESS
 
                 elif current_job_time == JOB_TYPE.NIGHT:
                     self.current_job_status = JOB_STATUS.JOB_IN_PROCESS
 
-                    if CCommon.is_current_day_time(self.current_time_zone):
+                    if current_unix_time > unix_time_job_end:
                         if self.assembled_speed_for_last_one_hour == 0:
                             self.current_job_status = JOB_STATUS.JOB_END
-                        else:
-                            self.current_job_status = JOB_STATUS.JOB_IN_PROCESS
-                    else:
-                        self.current_job_status = JOB_STATUS.JOB_IN_PROCESS
+
+                        # if CCommon.is_current_day_time(self.current_time_zone):
+                        #     if self.assembled_speed_for_last_one_hour == 0:
+                        #         self.current_job_status = JOB_STATUS.JOB_END
+                        #     else:
+                        #         self.current_job_status = JOB_STATUS.JOB_IN_PROCESS
+                        # else:
+                        #     self.current_job_status = JOB_STATUS.JOB_IN_PROCESS
 
                 #
                 if (self.current_job_status == JOB_STATUS.JOB_IN_PROCESS or
@@ -459,6 +475,7 @@ class CScore:
                     # TODO Блок показа общего плана за смену
 
                     if self.get_end_job_score(data_unit) is True:
+
                         # расчёт цветов для фронтенда
                         self.get_speed_ticks(data_unit)
                         self.__is_result_stored = True
@@ -540,20 +557,22 @@ class CScore:
         elif self.current_job_status == JOB_STATUS.JOB_END:
 
             count_tv_average_ph_for_plan = int(
-                self.assembled_device / (
+                self.total_day_plan / (
                         all_job_time_sec / 3600))  # int(count_tv_forecast_on_day / (all_job_time_mins / 60))
 
             self.total_day_plan_speed = count_tv_average_ph_for_plan
+            print(count_tv_average_ph_for_plan)
 
             # ------------------ Получение css относительно количества
             self.count_tv_on_5min_css = "-"  # Скорость за 5 минут
 
             opt_speed = int(self.total_day_plan / all_job_time_sec * 3600)
 
-            self.average_fact_on_hour_css = CCommon.estimate(count_tv_average_ph_for_plan, opt_speed)
+
             # class_func.estimate(int((1 / h1_tact) * 10000), int((1 / opt_tact) * 10000))  # css средней скорости
 
             self.count_tv_average_ph_for_plan_css = "-"
+            self.average_fact_on_hour_css = "-"
             # css выборки за час
 
             self.assembled_speed_for_last_five_mins = 0

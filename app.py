@@ -218,7 +218,7 @@ def page_not_found(error_str):
 
 class Lines:
     active_lines = list()
-    UPDATE_SECS = 20
+    UPDATE_SECS = 10
 
     def __init__(self, line_id: int, line_enum: LINE_DATA, line_id_str: str):
         self.unix_last_update_time = 0
