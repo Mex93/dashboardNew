@@ -201,6 +201,8 @@ class CData:
                     f"Отключение от БД(CData -> get_data_for_line): CONNECT_DB_TYPE.LOCAL [sql_handle: {local_sql.get_sql_handle()}]")
                 local_sql.disconnect_from_db()
 
+        return False
+
     def get_break_delay_time(self, br_type: BREAK_TYPE, job_time: JOB_TYPE):
         """
         Returnet time in sec

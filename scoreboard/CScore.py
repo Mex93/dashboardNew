@@ -363,116 +363,126 @@ class CScore:
 
         # cdata
         data_unit = CData(self.current_time_zone, self.current_line)
-        data_unit.get_data_for_line(self.current_time_zone)
+        if data_unit.get_data_for_line(self.current_time_zone) is True:
 
-        current_job_time = data_unit.get_job_time_type()
-        self.current_job_time = current_job_time
+            current_job_time = data_unit.get_job_time_type()
+            self.current_job_time = current_job_time
 
-        break_list = data_unit.get_current_break_time(current_job_time)
+            break_list = data_unit.get_current_break_time(current_job_time)
 
-        # code
+            # code
 
-        self.total_day_plan = data_unit.get_day_total_plane()  # Дневной план
+            self.total_day_plan = data_unit.get_day_total_plane()  # Дневной план
 
-        self.get_hours_score(DATA_SCORE_TYPE.ONE_HOUR_DATA, break_list, data_unit)
+            if self.get_hours_score(DATA_SCORE_TYPE.ONE_HOUR_DATA, break_list, data_unit) is True:
 
-        # расчёт типа смены[день ночь] и статуса[перерыв, работа итд]
-        if current_job_time == JOB_TYPE.DAY:
-            #  Может как то лучше сделать тут расчёт >?
-            if not CCommon.is_current_day_time(self.current_time_zone):
-                if self.assembled_speed_for_last_one_hour == 0:
-                    self.current_job_status = JOB_STATUS.JOB_END
-                else:
+                # расчёт типа смены[день ночь] и статуса[перерыв, работа итд]
+                if current_job_time == JOB_TYPE.DAY:
+                    #  Может как то лучше сделать тут расчёт >?
+                    if not CCommon.is_current_day_time(self.current_time_zone):
+                        if self.assembled_speed_for_last_one_hour == 0:
+                            self.current_job_status = JOB_STATUS.JOB_END
+                        else:
+                            self.current_job_status = JOB_STATUS.JOB_IN_PROCESS
+                    else:
+                        self.current_job_status = JOB_STATUS.JOB_IN_PROCESS
+
+                elif current_job_time == JOB_TYPE.NIGHT:
                     self.current_job_status = JOB_STATUS.JOB_IN_PROCESS
-            else:
-                self.current_job_status = JOB_STATUS.JOB_IN_PROCESS
 
-        elif current_job_time == JOB_TYPE.NIGHT:
-            self.current_job_status = JOB_STATUS.JOB_IN_PROCESS
+                    if CCommon.is_current_day_time(self.current_time_zone):
+                        if self.assembled_speed_for_last_one_hour == 0:
+                            self.current_job_status = JOB_STATUS.JOB_END
+                        else:
+                            self.current_job_status = JOB_STATUS.JOB_IN_PROCESS
+                    else:
+                        self.current_job_status = JOB_STATUS.JOB_IN_PROCESS
 
-            if CCommon.is_current_day_time(self.current_time_zone):
-                if self.assembled_speed_for_last_one_hour == 0:
-                    self.current_job_status = JOB_STATUS.JOB_END
-                else:
-                    self.current_job_status = JOB_STATUS.JOB_IN_PROCESS
-            else:
-                self.current_job_status = JOB_STATUS.JOB_IN_PROCESS
+                #
+                if (self.current_job_status == JOB_STATUS.JOB_IN_PROCESS or
+                        self.current_job_status == JOB_STATUS.JOB_BREAK):
 
-        if self.current_job_status == JOB_STATUS.JOB_IN_PROCESS or self.current_job_status == JOB_STATUS.JOB_BREAK:
+                    if self.__get_12hours_data(data_unit) is True:
+                        if self.get_hours_score(DATA_SCORE_TYPE.ONE_HOUR_DATA, break_list, data_unit) is True:
+                            if self.get_hours_score(DATA_SCORE_TYPE.FIVE_MINS_DATA, break_list, data_unit) is True:
 
-            self.__get_12hours_data(data_unit)
-            self.get_hours_score(DATA_SCORE_TYPE.ONE_HOUR_DATA, break_list, data_unit)
-            self.get_hours_score(DATA_SCORE_TYPE.FIVE_MINS_DATA, break_list, data_unit)
+                                is_break = False
 
-            is_break = False
+                                if isinstance(break_list, list):
+                                    ctype = break_list[0]
+                                    if ctype != JOB_STATUS.NONE:
+                                        self.current_job_status = JOB_STATUS.JOB_BREAK
+                                        self.job_break_type = ctype
+                                        is_break = True
 
-            if isinstance(break_list, list):
-                ctype = break_list[0]
-                if ctype != JOB_STATUS.NONE:
-                    self.current_job_status = JOB_STATUS.JOB_BREAK
-                    self.job_break_type = ctype
-                    is_break = True
+                                if is_break is False:
+                                    self.current_job_status = JOB_STATUS.JOB_IN_PROCESS
+                                    self.job_break_type = BREAK_TYPE.NONE
 
-            if is_break is False:
-                self.current_job_status = JOB_STATUS.JOB_IN_PROCESS
-                self.job_break_type = BREAK_TYPE.NONE
+                                # время от старта смены и до текущего момента с компенсацией перерыва
+                                compensace_list = data_unit.get_compensace_start_to_now_time(current_job_time)
+                                start_to_now_compensace = compensace_list[0]
+                                # время от старта смены и до текущего момента с компенсацией перерыва
+                                now_to_end_compensace = compensace_list[1]  # время от конца смены до текущего момента
 
-            # время от старта смены и до текущего момента с компенсацией перерыва
-            compensace_list = data_unit.get_compensace_start_to_now_time(current_job_time)
-            start_to_now_compensace = compensace_list[0]
-            # время от старта смены и до текущего момента с компенсацией перерыва
-            now_to_end_compensace = compensace_list[1]  # время от конца смены до текущего момента
+                                self.total_day_plan_speed = data_unit.get_day_plane_total_speed_for_hour(
+                                    current_job_time, data_unit.job_day_delay)  # Расчётная скорость телеков в час
 
-            self.total_day_plan_speed = data_unit.get_day_plane_total_speed_for_hour(
-                current_job_time, data_unit.job_day_delay)  # Расчётная скорость телеков в час
+                                # Компенсация времени перерыва если он начат
 
-            # Компенсация времени перерыва если он начат
+                                compensace_sec_current_break = 0
+                                if is_break is True:
+                                    compensace_sec_current_break = data_unit.get_break_last_time(self.job_break_type, current_job_time)
+                                else:
+                                    compensace_sec_current_break = 0
 
-            compensace_sec_current_break = 0
-            if is_break is True:
-                compensace_sec_current_break = data_unit.get_break_last_time(self.job_break_type, current_job_time)
-            else:
-                compensace_sec_current_break = 0
+                                # Скорость дневного плана в час
 
-            # Скорость дневного плана в час
+                                if self.assembled_device == 0:
+                                    self.assembled_device_speed = 0
+                                else:
+                                    # print(start_to_now_compensace, compensace_sec_current_break)
+                                    self.assembled_device_speed = int(
+                                        self.assembled_device / ((start_to_now_compensace + compensace_sec_current_break) / 3600))
 
-            if self.assembled_device == 0:
-                self.assembled_device_speed = 0
-            else:
-                # print(start_to_now_compensace, compensace_sec_current_break)
-                self.assembled_device_speed = int(
-                    self.assembled_device / ((start_to_now_compensace + compensace_sec_current_break) / 3600))
+                                # Прогноз за день
+                                hour_nte = now_to_end_compensace / 3600  # Количетво часов из оставшегося времени до конца смены
+                                forecast_day_for_day_nte = int(self.assembled_device_speed * hour_nte)
+                                self.assembled_forecast_for_day = self.assembled_device + forecast_day_for_day_nte
 
-            # Прогноз за день
-            hour_nte = now_to_end_compensace / 3600  # Количетво часов из оставшегося времени до конца смены
-            forecast_day_for_day_nte = int(self.assembled_device_speed * hour_nte)
-            self.assembled_forecast_for_day = self.assembled_device + forecast_day_for_day_nte
+                                # расчёт цветов для фронтенда
+                                self.get_speed_ticks(data_unit)
+                                self.__is_result_stored = True
+                                return True
 
-        elif self.current_job_status == JOB_STATUS.JOB_END:
-            # TODO Блок показа общего плана за смену
+                elif self.current_job_status == JOB_STATUS.JOB_END:
+                    # TODO Блок показа общего плана за смену
 
-            self.get_end_job_score(data_unit)
+                    if self.get_end_job_score(data_unit) is True:
+                        # расчёт цветов для фронтенда
+                        self.get_speed_ticks(data_unit)
+                        self.__is_result_stored = True
+                        return True
 
-        # расчёт цветов для фронтенда
-        self.get_speed_ticks(data_unit)
 
-        # print("Перерыв " + str(break_list))
-        # print("Тип смены " + str(self.current_job_status))
-        #
-        # # слева
-        # print("Дневной план " + str(self.total_day_plan))
-        # print("Скорость дневного плана в час " + str(self.total_day_plan_speed))
-        #
-        # # справа
-        # print("Собрали по факту " + str(self.assembled_device))
-        # print("Скорость сборки за час от факта " + str(self.assembled_device_speed))
-        #
-        # # Снизу
-        # print("За последние пять минут " + str(self.assembled_speed_for_last_five_mins))
-        # print("За последний час " + str(self.assembled_speed_for_last_one_hour))
-        # print("Прогноз за день " + str(self.assembled_forecast_for_day))
+                # print("Перерыв " + str(break_list))
+                # print("Тип смены " + str(self.current_job_status))
+                #
+                # # слева
+                # print("Дневной план " + str(self.total_day_plan))
+                # print("Скорость дневного плана в час " + str(self.total_day_plan_speed))
+                #
+                # # справа
+                # print("Собрали по факту " + str(self.assembled_device))
+                # print("Скорость сборки за час от факта " + str(self.assembled_device_speed))
+                #
+                # # Снизу
+                # print("За последние пять минут " + str(self.assembled_speed_for_last_five_mins))
+                # print("За последний час " + str(self.assembled_speed_for_last_one_hour))
+                # print("Прогноз за день " + str(self.assembled_forecast_for_day))
 
-        self.__is_result_stored = True
+        self.__is_result_stored = False
+        return False
 
     def get_result_status(self):
         return self.__is_result_stored
@@ -577,8 +587,10 @@ class CScore:
                 return "Текущая смена"
         elif self.current_job_status == JOB_STATUS.JOB_BREAK:
             return CCommon.get_breaks_name(self.job_break_type)
-        elif self.current_job_status in (JOB_STATUS.JOB_END, JOB_STATUS.NONE):
+        elif self.current_job_status == JOB_STATUS.JOB_END:
             return "Смена окончена"
+        elif self.current_job_status == JOB_STATUS.NONE:
+            return "Тип смены не установлен"
 
         return "Неизвестно"
 
