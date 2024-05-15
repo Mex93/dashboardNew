@@ -51,6 +51,20 @@ class CCommon:
         return False
 
     @staticmethod
+    def get_current_time_zone_for_current_line(line_id: LINE_ID) -> TIME_ZONES:
+
+        if line_id in (LINE_ID.LINE_VRN_ONE,
+                       LINE_ID.LINE_VRN_TWO,
+                       LINE_ID.LINE_VRN_TRI,
+                       LINE_ID.LINE_VRN_FOUR
+                       ):
+            return TIME_ZONES.RUSSIA
+        elif line_id == LINE_ID.LINE_KZ_ONE:
+            return TIME_ZONES.KZ
+        else:
+            return TIME_ZONES.NONE
+
+    @staticmethod
     def get_line_id_type_from_line_id(line_id: int) -> LINE_ID | bool:
 
         match line_id:

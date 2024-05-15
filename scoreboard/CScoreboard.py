@@ -135,12 +135,12 @@ class CScore:
                 Clog.lprint(f"Внимание! Ошибка SQL: NonType [get_12hours_data][{err}]")
 
             finally:
-                Clog.lprint(f"Отключение от БД(CScore -> get_12hours_data): CONNECT_DB_TYPE.LOCAL [sql_handle: "
+                Clog.lprint(f"Отключение от БД(CScore -> get_12hours_data): CONNECT_DB_TYPE.LINE [sql_handle: "
                             f"{global_sql.get_sql_handle()}]")
                 global_sql.disconnect_from_db()
         return False
 
-    def get_hours_score(self, score_type: DATA_SCORE_TYPE, break_params: list, cdata_unit: CData):
+    def get_hours_score(self, score_type: DATA_SCORE_TYPE, break_params: list):
         sql_line_id = CCommon.get_line_id_for_sql(self.current_line)
         if sql_line_id:
 
@@ -205,7 +205,6 @@ class CScore:
                                         f"FROM {SQL_TABLE_NAME.assembled_tv} "
                                         f"WHERE {ASSEMBLED_TABLE_FIELDS.fd_linefk} = {sql_line_id} "
                                         f"AND {ASSEMBLED_TABLE_FIELDS.fd_completed_date} >= '{time_line_start}' LIMIT 300")
-                        #print(query_string)
                     else:
                         query_string = (f"SELECT COUNT(DISTINCT check_report.assy_id) AS tv_count "
                                         "FROM check_report "
@@ -216,7 +215,6 @@ class CScore:
                                         f"check_report.station_id = "
                                         f"(SELECT station_id FROM stations WHERE station_line = 5 LIMIT 1) "
                                         f"LIMIT 300")
-
 
                     result = global_sql.sql_query_and_get_result(
 
@@ -246,7 +244,7 @@ class CScore:
                 Clog.lprint(f"Внимание! Ошибка SQL: NonType [get_hours_score][{err}]")
 
             finally:
-                Clog.lprint(f"Отключение от БД(CScore -> get_hours_score): CONNECT_DB_TYPE.LOCAL [sql_handle: "
+                Clog.lprint(f"Отключение от БД(CScore -> get_hours_score): CONNECT_DB_TYPE.LINE [sql_handle: "
                             f"{global_sql.get_sql_handle()}]")
                 global_sql.disconnect_from_db()
         return False
@@ -351,7 +349,7 @@ class CScore:
                 Clog.lprint(f"Внимание! Ошибка SQL: NonType [get_end_job_score] [{err}]")
 
             finally:
-                Clog.lprint(f"Отключение от БД(CScore -> get_end_job_score): CONNECT_DB_TYPE.LOCAL [sql_handle: "
+                Clog.lprint(f"Отключение от БД(CScore -> get_end_job_score): CONNECT_DB_TYPE.LINE [sql_handle: "
                             f"{global_sql.get_sql_handle()}]")
                 global_sql.disconnect_from_db()
         return False
@@ -363,7 +361,7 @@ class CScore:
 
         # cdata
         data_unit = CData(self.current_time_zone, self.current_line)
-        if data_unit.get_data_for_line(self.current_time_zone) is True:
+        if data_unit.get_data_for_line() is True:
 
             current_job_time = data_unit.get_job_time_type()
             self.current_job_time = current_job_time
@@ -374,7 +372,7 @@ class CScore:
 
             self.total_day_plan = data_unit.get_day_total_plane()  # Дневной план
 
-            if self.get_hours_score(DATA_SCORE_TYPE.ONE_HOUR_DATA, break_list, data_unit) is True:
+            if self.get_hours_score(DATA_SCORE_TYPE.ONE_HOUR_DATA, break_list) is True:
                 current_unix_time = int(CCommon.get_current_time(self.current_time_zone).timestamp())
                 unix_time_job_end = data_unit.get_job_time_unix_time(JOB_TIME.END, current_job_time)
 
@@ -419,8 +417,8 @@ class CScore:
                         self.current_job_status == JOB_STATUS.JOB_BREAK):
 
                     if self.__get_12hours_data(data_unit) is True:
-                        if self.get_hours_score(DATA_SCORE_TYPE.ONE_HOUR_DATA, break_list, data_unit) is True:
-                            if self.get_hours_score(DATA_SCORE_TYPE.FIVE_MINS_DATA, break_list, data_unit) is True:
+                        if self.get_hours_score(DATA_SCORE_TYPE.ONE_HOUR_DATA, break_list) is True:
+                            if self.get_hours_score(DATA_SCORE_TYPE.FIVE_MINS_DATA, break_list) is True:
 
                                 is_break = False
 
@@ -446,7 +444,6 @@ class CScore:
 
                                 # Компенсация времени перерыва если он начат
 
-                                compensace_sec_current_break = 0
                                 if is_break is True:
                                     compensace_sec_current_break = data_unit.get_break_last_time(self.job_break_type, current_job_time)
                                 else:
@@ -481,7 +478,6 @@ class CScore:
                         self.__is_result_stored = True
                         return True
 
-
                 # print("Перерыв " + str(break_list))
                 # print("Тип смены " + str(self.current_job_status))
                 #
@@ -503,6 +499,9 @@ class CScore:
 
     def get_result_status(self):
         return self.__is_result_stored
+
+    def get_job_time(self):
+        return self.current_job_time
 
     def get_speed_ticks(self, cdata_unit):
         """
@@ -566,8 +565,7 @@ class CScore:
             # ------------------ Получение css относительно количества
             self.count_tv_on_5min_css = "-"  # Скорость за 5 минут
 
-            opt_speed = int(self.total_day_plan / all_job_time_sec * 3600)
-
+            # opt_speed = int(self.total_day_plan / all_job_time_sec * 3600)
 
             # class_func.estimate(int((1 / h1_tact) * 10000), int((1 / opt_tact) * 10000))  # css средней скорости
 
@@ -596,7 +594,6 @@ class CScore:
     def get_job_status_string(self) -> str:
         """
         Возврат названия статуса смены
-        :param brake_type:
         :return:
         """
         if self.current_job_status == JOB_STATUS.JOB_IN_PROCESS:

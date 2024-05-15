@@ -11,6 +11,7 @@ debug = False
 
 load = 0
 
+
 @app.route('/logo.ico')
 def favicon():
     return url_for('static', filename='/static/img/logo.ico')
@@ -64,17 +65,18 @@ def scorebar():
                 return result
 
     return json.dumps({
-            'name': "Цех: -",
-            'time_mins': "-",
-            'time_hours': "-",
-            'status_txt': "Error Check Data...",
-            'title': "Цех: -",
-            'checked_data': -1,
-            'time_gmt': "0300",
-            'error': f"Error Load Data(Error name do Not detect)",
-        })
+        'name': "Цех: -",
+        'time_mins': "-",
+        'time_hours': "-",
+        'status_txt': "Error Check Data...",
+        'title': "Цех: -",
+        'checked_data': -1,
+        'time_gmt': "0300",
+        'error': f"Error Load Data(Error name do Not detect)",
+    })
 
-from scoreboard.CScore import CScore
+
+from scoreboard.CScoreboard import CScore
 from scoreboard.common import CCommon
 from sql.enums import TIME_ZONES
 
@@ -300,5 +302,4 @@ def get_current_unix_time() -> int:
 
 
 if __name__ == "__main__":
-
     app.run(debug=False)

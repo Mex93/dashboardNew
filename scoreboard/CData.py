@@ -21,7 +21,7 @@ class CData:
         self.current_line_id = line_id  # Текущая линия
         self.total_smena_delay = 0  # Дневная смена в часах
 
-        self.current_job_type = JOB_TYPE.NONE  # Тип смены день ночь
+        self.current_job_time_type = JOB_TYPE.NONE  # Тип смены день ночь
         self.job_day_delay = 0  # Продолжительность рабочей смены в часах 8-12
         # список с перерывами
         self.break_time_night = tuple()
@@ -34,7 +34,7 @@ class CData:
         self.start_job_night = "20:00"
         self.end_job_night = "08:00"
 
-    def get_data_for_line(self, time_zone: TIME_ZONES):
+    def get_data_for_line(self):
 
         sql_line_id = CCommon.get_line_id_for_sql(self.current_line_id)
         if sql_line_id:
@@ -97,7 +97,7 @@ class CData:
                     # Тип смены день ночь
                     # Меняется в бд для день или ночь
                     # Если выставлен день то ночных смен нет и наоборот
-                    self.current_job_type = result[0].get(PLAN_TABLE_FIELDS.fd_smena_start_job_type, None)
+                    self.current_job_time_type = result[0].get(PLAN_TABLE_FIELDS.fd_smena_start_job_type, None)
 
                     check_list = (
                         # старт смены и конец - строка
@@ -108,7 +108,7 @@ class CData:
                         self.end_job_night,
 
                         # тип смены
-                        self.current_job_type,
+                        self.current_job_time_type,
 
                         self.last_change_data,
                         self.total_day_plane,
@@ -339,7 +339,7 @@ class CData:
         return buff  # результат в секундах
 
     def get_job_time_type(self):
-        return self.current_job_type
+        return self.current_job_time_type
 
     def get_job_time_unix_time(self, job_type: JOB_TIME, job_time: JOB_TYPE):
 
