@@ -39,7 +39,7 @@ const cDebug = new CDebugger(true);
 const cHTMLUnit = new CHTMLBlocks();
 const cHTMLType = new CLineShowType();
 
-
+const DEFAULT_LINE_DAY_PLANE = 777;
 let updateTimerCounts = 0;
 let onCreateUpdateTimerID = -1;
 let onUpdateTimerID = -1;
@@ -233,7 +233,6 @@ function CreateChartHandlersData()
 
     let CLines_obj = [CLine_1, CLine_2, CLine_3, CLine_4, CLine_5];
     // получим инфу и обработаем, положим в массивы
-    let time_gmt = document.getElementById('time_gmt').textContent;
 
     let max_lines= cHTMLType.getMaxLines();
     if(debug)
@@ -323,7 +322,7 @@ function CreateChartHandlersData()
             return 1;
         }
         //console.log(encodeType)
-        let json_text = '{"ctime_gmt": "'+ time_gmt +'", "chtml_type": "'+ encodeType +'"}';
+        let json_text = '{"chtml_type": "'+ encodeType +'"}';
         let completed_json = jQuery.parseJSON(json_text);
         $.getJSON('/engine_scripts/py/launch_scripts/dashboard_get_stats.py',
             completed_json, function (data)
@@ -332,46 +331,38 @@ function CreateChartHandlersData()
             // const incommingArray = JSON.parse(data)
 
            //cDebug.dprint(data)
-            //console.log(data);
-            for(let i= 0; i < data.length; i++)
+            if(Array.isArray(data))
             {
-                let lineID = data[i][INCOMMING_ARR_TYPE.LINEID];
-                let findObjectID = LineParams.GetObjectIDFromLineID(
-                    CLines_obj,
-                    lineID);
-
-                if(findObjectID !== -1)
+                for(let i= 0; i < data.length; i++)
                 {
-                    if(data[i][INCOMMING_ARR_TYPE.DAY_PLANE] === 1202 && // пустые значения для линий
-                        data[i][INCOMMING_ARR_TYPE.HOUR_PLANE] === 122)
+                    let data_arr = data[i][0]
+                    if(Array.isArray(data_arr))
                     {
-                        continue;
+                        console.log(data_arr);
+                        let lineID = data_arr[INCOMMING_ARR_TYPE.LINEID];
+                        let findObjectID = LineParams.GetObjectIDFromLineID(CLines_obj,lineID);
+
+                        if(findObjectID !== -1)
+                        {
+                            if(data_arr[INCOMMING_ARR_TYPE.DAY_PLANE] === DEFAULT_LINE_DAY_PLANE)
+                            {
+                                continue;
+                            }
+                            findObjectID.SetParams(PARAMS_ID.LINE_DAY_PLANE,
+                                data_arr[INCOMMING_ARR_TYPE.DAY_PLANE]);
+
+                            findObjectID.SetParams(PARAMS_ID.LINE_HOUR_PLANE,
+                                data_arr[INCOMMING_ARR_TYPE.HOUR_PLANE]);
+
+                            findObjectID.SetParams(PARAMS_ID.LINE_FIVE_MINS,
+                                data_arr[INCOMMING_ARR_TYPE.FIVEMINS]);
+
+                            findObjectID.SetParams(PARAMS_ID.LINE_HOURS,
+                                data_arr[INCOMMING_ARR_TYPE.HOURS]);
+                            //cDebug.dprint(findObjectID.GetParams(PARAMS_ID.LINE_CANVAS_ID));
+                            StoredData(findObjectID);
                     }
-                    findObjectID.SetParams(PARAMS_ID.LINE_DAY_PLANE,
-                        data[i][INCOMMING_ARR_TYPE.DAY_PLANE]);
-
-                    findObjectID.SetParams(PARAMS_ID.LINE_DAY_FACT,
-                        data[i][INCOMMING_ARR_TYPE.DAY_FACT]);
-
-                    findObjectID.SetParams(PARAMS_ID.LINE_HOUR_FACT_SPEED,
-                        data[i][INCOMMING_ARR_TYPE.HOUR_FACT_SPEED]);
-
-                    findObjectID.SetParams(PARAMS_ID.LINE_DAY_FORECAST,
-                        data[i][INCOMMING_ARR_TYPE.DAY_FORECAST]);
-
-                    findObjectID.SetParams(PARAMS_ID.LINE_CSS_SCOREBOARD,
-                        data[i][INCOMMING_ARR_TYPE.CSS_SCOREBOARD]);
-
-                    findObjectID.SetParams(PARAMS_ID.LINE_HOUR_PLANE,
-                        data[i][INCOMMING_ARR_TYPE.HOUR_PLANE]);
-
-                    findObjectID.SetParams(PARAMS_ID.LINE_FIVE_MINS,
-                        data[i][INCOMMING_ARR_TYPE.FIVEMINS]);
-
-                    findObjectID.SetParams(PARAMS_ID.LINE_HOURS,
-                        data[i][INCOMMING_ARR_TYPE.HOURS]);
-                    //cDebug.dprint(findObjectID.GetParams(PARAMS_ID.LINE_CANVAS_ID));
-                    StoredData(findObjectID);
+                    }
                 }
             }
         }
@@ -727,28 +718,20 @@ function StoredData(unit_line)
 
         // деструктурируем css object
         // свойство "-" по умолчанию, если его нет у объекта
-        let cssScoreboard = unit_line.GetParams(PARAMS_ID.LINE_CSS_SCOREBOARD);
-        let {count_tv_on_5min_css: tvCSSOn5Min = "-",
-            count_tv_average_ph_for_plan_css: tvCSSAveragePHForPlan= "-",
-            average_fact_on_hour_css: tvCSSAverageFactOnHour= "-",
-            count_tv_forecast_on_day_css: tvCSSForecastOnDay= "-"} = cssScoreboard
-
-        tvCSSOn5Min = ConvertCssColorForRGB(tvCSSOn5Min);
-        tvCSSAveragePHForPlan = ConvertCssColorForRGB(tvCSSAveragePHForPlan);
-        tvCSSAverageFactOnHour = ConvertCssColorForRGB(tvCSSAverageFactOnHour);
-        tvCSSForecastOnDay = ConvertCssColorForRGB(tvCSSForecastOnDay);
+        // let cssScoreboard = unit_line.GetParams(PARAMS_ID.LINE_CSS_SCOREBOARD);
+        // let {count_tv_on_5min_css: tvCSSOn5Min = "-",
+        //     count_tv_average_ph_for_plan_css: tvCSSAveragePHForPlan= "-",
+        //     average_fact_on_hour_css: tvCSSAverageFactOnHour= "-",
+        //     count_tv_forecast_on_day_css: tvCSSForecastOnDay= "-"} = cssScoreboard
+        //
+        // tvCSSOn5Min = ConvertCssColorForRGB(tvCSSOn5Min);
+        // tvCSSAveragePHForPlan = ConvertCssColorForRGB(tvCSSAveragePHForPlan);
+        // tvCSSAverageFactOnHour = ConvertCssColorForRGB(tvCSSAverageFactOnHour);
+        // tvCSSForecastOnDay = ConvertCssColorForRGB(tvCSSForecastOnDay);
 
         let dayPlane = unit_line.GetParams(PARAMS_ID.LINE_DAY_PLANE);
         let obj = {
             dayPlane,
-            dayFact,
-            factSpeed,
-            dayForecast,
-            tvCSSOn5Min,
-            tvCSSAveragePHForPlan,
-            tvCSSAverageFactOnHour,
-            tvCSSForecastOnDay,
-            defColor: subtitleColor
     }
 
         chartID.options.plugins.subtitle.text = SetMakeScoreString(obj);

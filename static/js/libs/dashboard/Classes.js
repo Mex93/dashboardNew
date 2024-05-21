@@ -13,13 +13,19 @@ const INCOMMING_ARR_TYPE = {
     FIVEMINS: 1,
     DAY_PLANE: 2,
     HOUR_PLANE: 3,
+    LINEID: 4
 
-    DAY_FACT: 4,
-    HOUR_FACT_SPEED: 5,
-    DAY_FORECAST: 6,
-    CSS_SCOREBOARD: 7,
+    // HOURS: 0,
+    // FIVEMINS: 1,
+    // DAY_PLANE: 2,
+    // HOUR_PLANE: 3,
+    //
+    // DAY_FACT: 4,
+    // HOUR_FACT_SPEED: 5,
+    // DAY_FORECAST: 6,
+    // CSS_SCOREBOARD: 7,
 
-    LINEID: 8
+    // LINEID: 8
 
 };
 

@@ -32,11 +32,8 @@ class CDashboard:
             return False
 
         result_arr = self.get_points(plan_unit)
-        if result_arr is not False:
-            pass
-
-        ts_date_interval = result_arr[0]
-        tv_count_on_5min = result_arr[1]
+        if result_arr is False:
+            return False
 
         # TODO логика работы:
         # 1 Получаем результат из бд
@@ -44,16 +41,16 @@ class CDashboard:
         # 3 Перезаписываем совпадающие значения в словаре шаблона из словаря результата
         # 4 Профит - отправляем словари часы минуты
         # print(result_arr)
-        arr_size = tv_count_on_5min.__len__()
+        arr_size = result_arr.__len__()
         db_results_dict = dict()
         for i in range(arr_size):
             # Parsing даты
-            string = str(ts_date_interval[i])
+            string = str(result_arr[i]["ts_date_interval"])
             buff = string.split(" ")
             buff = str(buff[1]).split(":")
             buff = f"{int(buff[0]) + 0:02}" + ":" + buff[1]
             # -------------
-            count = tv_count_on_5min[i]  # 310 не поддерживает прямо в f строке
+            count = result_arr[i]["tv_count_on_5min"]  # 310 не поддерживает прямо в f строке
             # print(buff, count)
             db_results_dict.update({f"{buff}": f"{count}"})
 
@@ -170,10 +167,10 @@ class CDashboard:
                 h = 0
                 j = i - 12
                 while j < i:
-                    h += tv_count_on_5min[j]
+                    h += result_arr[j]["tv_count_on_5min"]
                     j += 1
                 # parsing
-                label_parced = str(ts_date_interval[i]).split(" ")
+                label_parced = str(result_arr[i]["ts_date_interval"]).split(" ")
                 label_parced = label_parced[1].split(":")
                 label_parced = f"{label_parced[0]}:{label_parced[1]}"
                 #
@@ -230,24 +227,25 @@ class CDashboard:
             return False
 
         restup = (count_in_hour,
-                  result_time_dict_5mins
+                  result_time_dict_5mins,
+                  plan_unit.get_day_total_plane(),
+                  plan_unit.get_day_plane_total_speed_for_hour(job_time, plan_unit.job_day_delay)
                   )
 
         return restup
 
-    def get_points(self, cdata_unit: CData) -> tuple | bool:
+    def get_points(self, cdata_unit: CData) -> list | bool:
 
         sql_line_id = CCommon.get_line_id_for_sql(self.current_line)
         if sql_line_id:
             global_sql = CSqlAgent(self.current_time_zone)
-
             try:
                 result = global_sql.connect_to_db(CONNECT_DB_TYPE.LINE)
                 sql_handle = global_sql.get_sql_handle()
                 Clog.lprint(
                     f"Подключение к БД(CDashboard -> get_points): CONNECT_DB_TYPE.LINE [sql_handle: {sql_handle}]")
-                if result:
 
+                if result:
                     time_zone_str = CCommon.get_time_zone_str_from_country_time_zone(self.current_time_zone)
                     cdate = CCommon.get_current_time(self.current_time_zone)
                     #
@@ -278,11 +276,17 @@ class CDashboard:
                         start_date = cdate.strptime(f"{year}/{month}/{day} {cdata_unit.start_job_night}:00",
                                                     "%Y/%m/%d %H:%M:%S")
                     if start_date is not None:
-                        if ((job_time == JOB_TYPE.DAY and not CCommon.is_current_day_time(
-                                self.current_time_zone)) or
-                                (job_time == JOB_TYPE.NIGHT and CCommon.is_current_day_time(
-                                    self.current_time_zone))):
-                            start_date = start_date - timedelta(days=1)
+
+                        if job_time == JOB_TYPE.NIGHT:
+                            if CCommon.is_night_job_hour(self.current_time_zone):
+                                start_date = start_date - timedelta(days=1)
+                                mins_correct = start_date.minute
+                                hours_correct = start_date.hour
+                                # seconds_correct = start_date.second
+                                day_correct = start_date.day
+                                month_correct = start_date.month
+                                year_correct = start_date.year
+                        else:
                             mins_correct = start_date.minute
                             hours_correct = start_date.hour
                             # seconds_correct = start_date.second
@@ -310,9 +314,11 @@ class CDashboard:
                             "GROUP BY 1 "
                             "ORDER BY 1 "
                             "LIMIT 144")  # 12 * 12 сколько по 5 минут каждый час в часу
-                    else:
+                        print(time_line_start)
 
+                    else:
                         query_string = (
+                            f"SELECT "
                             f"date_bin('5 min', {ASSEMBLED_TABLE_FIELDS.fd_completed_date}, "
                             f"'2022-1-1') AS ts_date_interval, "
                             "COUNT(DISTINCT check_report.assy_id) as tv_count_on_5min"
@@ -328,18 +334,12 @@ class CDashboard:
                             f"LIMIT 3000")
 
                     result = global_sql.sql_query_and_get_result(
-
                         sql_handle, query_string, (sql_line_id,), "_1", )  # Запрос типа аасоциативного массива
+                    # print(result)
                     if result is False:  # Errorrrrrrrrrrrrr based data
                         return False
-                    # print(result)
 
-                    ts_date_interval = result[0].get("ts_date_interval", None)
-                    tv_count_on_5min = result[0].get("tv_count_on_5min", None)
-                    if ts_date_interval is not None and tv_count_on_5min is not None:
-                        Clog.lprint(f"CDashboard -> get_points ->  Данные получены!")
-                        ret = (ts_date_interval, tv_count_on_5min)
-                        return ret
+                    return result
 
             except NotConnectToDB as err:
                 Clog.lprint(f"Внимание! Ошибка SQL: NotConnectToDB [get_points] [{err}]")

@@ -4,7 +4,6 @@ from sql.enums import TIME_ZONES
 from datetime import timedelta
 from datetime import datetime, timezone
 
-
 from random import randint
 
 
@@ -123,6 +122,28 @@ class CCommon:
             return False
         else:
             return True
+
+    @classmethod
+    def is_night_job_hour(cls, time_zone: TIME_ZONES) -> bool:
+        """
+            Проверка на часы работы линии. Учитывается день
+        :return:
+        """
+        cdate = cls.get_current_time(time_zone)
+        # mins = current_datetime.min
+        hours = cdate.hour
+
+        if (hours == 0 or
+                hours == 1 or
+                hours == 2 or
+                hours == 3 or
+                hours == 4 or
+                hours == 5 or
+                hours == 6 or
+                hours == 7):
+            return True
+        else:
+            return False
 
     @staticmethod
     def get_breaks_name(break_type: BREAK_TYPE):

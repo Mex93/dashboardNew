@@ -32,6 +32,17 @@ def get_kz():
     return render_template('scoreboard.html', time_gmt="2", line_id="5")
 
 
+@app.route('/get_score_line_<int:line_id>')
+def get_line_scorebar(line_id):
+    if 1 <= line_id <= 5:
+        time_gmt = "1"
+        if line_id == 5:
+            time_gmt = "2"
+        return render_template('scoreboard.html', time_gmt=time_gmt, line_id=str(line_id))
+
+    return render_template('scoreboard.html', time_gmt="1", line_id="1")
+
+
 @app.route('/engine_scripts/py/launch_scripts/scoreboard_get_stats.py', methods=['GET', 'POST'])
 def scorebar():
     # надо как то запретить переход по прямой ссылке к файлу
@@ -42,26 +53,26 @@ def scorebar():
 
     global load
     if load == 0:
-        Lines(1, LINE_DATA.LINE_VRN_0, "1")
-        Lines(2, LINE_DATA.LINE_VRN_1, "2")
-        Lines(3, LINE_DATA.LINE_VRN_2, "3")
-        Lines(4, LINE_DATA.LINE_VRN_3, "4")
+        LinesScoreboard(1, LINE_DATA.LINE_VRN_0, "1")
+        LinesScoreboard(2, LINE_DATA.LINE_VRN_1, "2")
+        LinesScoreboard(3, LINE_DATA.LINE_VRN_2, "3")
+        LinesScoreboard(4, LINE_DATA.LINE_VRN_3, "4")
 
-        Lines(5, LINE_DATA.LINE_KZ_0, "5")
+        LinesScoreboard(5, LINE_DATA.LINE_KZ_0, "5")
         load = 1
 
-    lines_list_unit = Lines.get_lines_list()
+    lines_list_unit = LinesScoreboard.get_lines_list()
 
     for current_unit in lines_list_unit:
         if current_unit.get_line_id_str() == clineid:
 
             if current_unit.get_time() > get_current_unix_time():
-                return current_unit.get_data()
+                return current_unit.get_score_data()
             else:
                 current_unit.update_time()
 
                 result = get_result_scoreboard_json(clineid, time_gmt)
-                current_unit.update_data(result)
+                current_unit.update_score_data(result)
                 return result
 
     return json.dumps({
@@ -76,9 +87,136 @@ def scorebar():
     })
 
 
+@app.route('/get_dashb_line_vrn')
+@app.route('/gdb_vrn')
+def dashboard_vrn():
+    return render_template('dashboard_vrn.html')
+
+
+@app.route('/get_dashb_line_kz')
+@app.route('/gdb_kz')
+def dashboard_kz():
+    return render_template('dashboard_kz.html')
+
+
+@app.route('/get_dashb_line_all')
+@app.route('/gdb_all')
+def dashboard_all():
+    return render_template('dashboard_all.html')
+
+
+@app.route('/engine_scripts/py/launch_scripts/dashboard_get_stats.py', methods=['GET', 'POST'])
+def dashboard():
+    # надо как то запретить переход по прямой ссылке к файлу
+
+    chtml_type = request.args['chtml_type']
+
+    html_type = int(chtml_type)
+    if html_type == 1:
+        html_type = "kz"
+    elif html_type == 2:
+        html_type = "vrn"
+    else:
+        html_type = "all"
+
+    global load
+    if load == 0:
+        LinesDashboard(1, LINE_DATA.LINE_VRN_0, "1")
+        LinesDashboard(2, LINE_DATA.LINE_VRN_1, "2")
+        LinesDashboard(3, LINE_DATA.LINE_VRN_2, "3")
+        LinesDashboard(4, LINE_DATA.LINE_VRN_3, "4")
+
+        LinesDashboard(5, LINE_DATA.LINE_KZ_0, "5")
+        load = 1
+
+    lines_list_unit = LinesDashboard.get_lines_list()
+
+    if html_type == "kz":
+        lines = ['5']
+        time_gmt = 2
+    elif html_type == "vrn":
+        lines = ['1', '2', '3', '4']
+        time_gmt = 1
+    elif html_type == "all":
+        lines = ['1', '2', '3', '4', '5']
+        time_gmt = 1
+    else:
+        return False
+
+    def get_find(lineslist: list, cur_lines: str) -> bool:
+        for line in lineslist:
+            if line == cur_lines:
+                return True
+        return False
+
+    results_line = []
+    for current_unit in lines_list_unit:
+        cline_id = current_unit.get_line_id_str()
+        if get_find(lines, cline_id):
+
+            if current_unit.get_time() < get_current_unix_time():
+                current_unit.update_time()
+                result = get_result_dashboard_json(cline_id, time_gmt)
+                current_unit.update_dashb_data(result)
+
+            dbdata = current_unit.get_dashb_data()
+            results_line.append([dbdata])
+
+    print(results_line)
+    return json.dumps(results_line)
+
+
 from scoreboard.CScoreboard import CScore
+from scoreboard.CDashboard import CDashboard
 from scoreboard.common import CCommon
 from sql.enums import TIME_ZONES
+
+
+def get_result_dashboard_json(line_id: str, ctime_gmt: int) -> list:
+    global debug
+
+    if debug:
+        input_line_id = 1
+        time_zone = TIME_ZONES.RUSSIA
+    else:
+        input_line_id = int(line_id)
+        input_time_gmt = ctime_gmt
+
+        if input_time_gmt == 1:
+            time_zone = TIME_ZONES.RUSSIA
+        else:
+            time_zone = TIME_ZONES.KZ
+
+    # Приём json запроса
+
+    # -----------------VARS
+
+    # Корректировка
+    line_id = CCommon.get_line_id_type_from_line_id(input_line_id)
+    if line_id is False:
+        line_id = 1
+
+    score_unit = CDashboard(time_zone, line_id)
+    dashb_data = score_unit.load_plan_settings()
+
+    count_in_hour = {'08': 0}
+    result_time_dict_5mins = {'08:00': 0}
+    day_plane = 777
+    sql_line_id = CCommon.get_line_id_for_sql(line_id)
+    hour_plane = 122
+    if dashb_data is False:
+        print("Лайн dafalut " + str(input_line_id))
+    else:
+        print("Лайн zaebis" + str(input_line_id))
+
+        count_in_hour, result_time_dict_5mins, day_plane, hour_plane = dashb_data
+        print(count_in_hour)
+        print(result_time_dict_5mins)
+        print(day_plane)
+        print(sql_line_id)
+        print(hour_plane)
+
+    return [count_in_hour, result_time_dict_5mins, day_plane, hour_plane, sql_line_id]
 
 
 def get_result_scoreboard_json(line_id: str, ctime_gmt: str) -> str:
@@ -195,38 +333,6 @@ def get_result_scoreboard_json(line_id: str, ctime_gmt: str) -> str:
     return completedjson
 
 
-#
-# @app.route('/engine_scripts/py/launch_scripts/dashboard_get_stats.py', methods=['GET', 'POST'])
-# def dashboard_py():
-#     # надо как то запретить переход по прямой ссылке к файлу
-#
-#     # time_gmt = request.args['ctime_gmt']
-#     # html_type = request.args['chtml_type']
-#     #
-#     # from engine_scripts.py.launch_scripts.dashboard_get_stats import get_result_json
-#     #
-#     # result = get_result_json(html_type, time_gmt)
-#     # return result
-#     return
-
-
-# @app.route('/dashboard_vrn/<int:gmt_time>')
-# @app.route('/db_vrn/<int:gmt_time>')
-# def dashboard_vrn(gmt_time):
-#     return render_template('dashboard_vrn.html', time_gmt=gmt_time)
-
-
-# @app.route('/dashboard_kz/<int:gmt_time>')
-# @app.route('/db_kz/<int:gmt_time>')
-# def dashboard_kz(gmt_time):
-#     return render_template('dashboard_kz.html', time_gmt=gmt_time)
-
-#
-# @app.route('/dashboard_all/<int:gmt_time>')
-# @app.route('/db_all/<int:gmt_time>')
-# def dashboard_all(gmt_time):
-#     return render_template('dashboard_all.html', time_gmt=gmt_time)
-
 
 @app.errorhandler(404)
 def page_not_found(error_str):
@@ -234,7 +340,7 @@ def page_not_found(error_str):
     return render_template('scoreboard.html', time_gmt="2", line_id="5")
 
 
-class Lines:
+class LinesScoreboard:
     active_lines = list()
     UPDATE_SECS = 10
 
@@ -251,14 +357,13 @@ class Lines:
             'time_gmt': "0300",
             'error': f"Error Load Data(Error name do Not detect)",
         })
-
         self.line_id_str = line_id_str
         self.line_enum = line_enum
         self.line_id = line_id
 
         self.update_time()
         self.save_line(self)
-        print(f"Линия создана. LINE_ID: {line_id}")
+        print(f"Линия создана scoreb. LINE_ID: {line_id}")
 
     #####################################################
     def get_line_id_str(self) -> str:
@@ -276,18 +381,77 @@ class Lines:
         return cls.active_lines
 
     #####################################################
-    def update_data(self, new_data: dict) -> None:
+    def update_score_data(self, new_data: dict) -> None:
         self.line_data_dict = new_data
-        print(f"Инфа обновлена. LINE_ID: {self.get_line_id()}")
+        print(f"Инфа Scoreb обновлена. LINE_ID: {self.get_line_id()}")
 
-    def get_data(self):
-        print(f"Старая инфа предоставлена. LINE_ID: {self.get_line_id()}")
+    def get_score_data(self):
+        print(f"Старая инфа Scoreb предоставлена. LINE_ID: {self.get_line_id()}")
         return self.line_data_dict
 
     #####################################################
     def update_time(self) -> int:
         self.unix_last_update_time = get_current_unix_time() + self.UPDATE_SECS
-        print(f"Unix Time Инфа обновлена. LINE_ID: {self.get_line_id()}")
+        print(f"Unix Time Инфа обновлена scoreb. LINE_ID: {self.get_line_id()}")
+        return self.get_time()
+
+    def get_time(self) -> int:
+        return self.unix_last_update_time
+
+    #####################################################
+
+
+class LinesDashboard:
+    active_lines = list()
+    UPDATE_SECS = 3
+
+    def __init__(self, line_id: int, line_enum: LINE_DATA, line_id_str: str):
+        self.unix_last_update_time = 0
+
+        self.line_data_dict = json.dumps({
+            'in_hour': {'08': 0},
+            'in_five_mins': {'08:00': 0},
+            'day_plane': 777,
+            'line_id': 0
+        })
+
+        self.line_id_str = line_id_str
+        self.line_enum = line_enum
+        self.line_id = line_id
+
+        self.update_time()
+        self.save_line(self)
+        print(f"Линия создана dashb. LINE_ID: {line_id}")
+
+    #####################################################
+    def get_line_id_str(self) -> str:
+        return self.line_id_str
+
+    def get_line_id(self) -> int:
+        return self.line_id
+
+    @classmethod
+    def save_line(cls, unitssss) -> None:
+        cls.active_lines.append(unitssss)
+
+    @classmethod
+    def get_lines_list(cls):
+        return cls.active_lines
+
+    #####################################################
+
+    def update_dashb_data(self, new_data: dict) -> None:
+        self.line_data_dict = new_data
+        print(f"Инфа dashb обновлена. LINE_ID: {self.get_line_id()}")
+
+    def get_dashb_data(self):
+        print(f"Старая инфа dashb предоставлена. LINE_ID: {self.get_line_id()}")
+        return self.line_data_dict
+
+    #####################################################
+    def update_time(self) -> int:
+        self.unix_last_update_time = get_current_unix_time() + self.UPDATE_SECS
+        print(f"Unix Time Инфа dashb обновлена. LINE_ID: {self.get_line_id()}")
         return self.get_time()
 
     def get_time(self) -> int:
