@@ -35,6 +35,7 @@ function getdata()
         $.getJSON('/engine_scripts/py/launch_scripts/scoreboard_get_stats.py', completed_json, function (data)
         {
             checked_data = data["checked_data"];
+            console.log(data)
             if(findWord(data["error"], "All Data Stored"))
             {
                 //console.log(data);

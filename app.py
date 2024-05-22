@@ -3,6 +3,10 @@ from datetime import datetime
 import threading
 
 from enums import LINE_DATA
+from scoreboard.CScoreboard import CScore
+from scoreboard.CDashboard import CDashboard
+from scoreboard.common import CCommon
+from sql.enums import TIME_ZONES
 
 app = Flask(__name__)
 
@@ -13,6 +17,7 @@ debug = False
 
 load_scoreboard = 0
 load_dashboard = 0
+
 
 @app.route('/logo.ico')
 def favicon():
@@ -50,7 +55,8 @@ def scorebar():
 
     for current_unit in lines_list_unit:
         if current_unit.get_line_id_str() == clineid:
-            return current_unit.get_score_data()
+            data = current_unit.get_score_data()
+            return json.dumps(data)
 
     return json.dumps({
         'name': "Цех: -",
@@ -118,15 +124,20 @@ def dashboard():
         cline_id = current_unit.get_line_id_str()
         if get_find(lines, cline_id):
             dbdata = current_unit.get_dashb_data()
-            results_line.append([dbdata])
+            score_unit = LinesScoreboard.find_scorebar_line_id(cline_id)
+            if score_unit is not None:
+                fact = score_unit.get_params("TV")
+                if not isinstance(fact, int):
+                    fact = -1
+                speed_per_hours = score_unit.get_params("av_speed")
+                if not isinstance(speed_per_hours, int):
+                    speed_per_hours = -1
+                day_forecast = score_unit.get_params("forecast_TV")
+                if not isinstance(day_forecast, int):
+                    day_forecast = -1
+                results_line.append([dbdata, fact, speed_per_hours, day_forecast])
 
     return json.dumps(results_line)
-
-
-from scoreboard.CScoreboard import CScore
-from scoreboard.CDashboard import CDashboard
-from scoreboard.common import CCommon
-from sql.enums import TIME_ZONES
 
 
 def get_result_dashboard_json(line_id: str, time_zone: TIME_ZONES) -> list:
@@ -163,7 +174,7 @@ def get_result_dashboard_json(line_id: str, time_zone: TIME_ZONES) -> list:
     return [count_in_hour, result_time_dict_5mins, day_plane, hour_plane, sql_line_id]
 
 
-def get_result_scoreboard_json(line_id: str, ctime_gmt: str) -> str:
+def get_result_scoreboard_json(line_id: str, ctime_gmt: str) -> dict:
     global debug
     if debug:
         input_line_id = 1
@@ -239,7 +250,7 @@ def get_result_scoreboard_json(line_id: str, ctime_gmt: str) -> str:
         count_tv_on_5min_css = css['count_tv_on_5min_css']
         count_tv_forecast_on_day_css = css['count_tv_forecast_on_day_css']
 
-        completedjson = json.dumps({
+        completedjson = {
             'name': ceh_name,
             'status_txt': job_status_str,
             'title': title_name,
@@ -261,9 +272,9 @@ def get_result_scoreboard_json(line_id: str, ctime_gmt: str) -> str:
             'time_gmt': input_time_gmt,
 
             'error': f"All Data Stored(No Errors)"
-        })
+        }
     else:  # Ошибка
-        completedjson = json.dumps({
+        completedjson = {
             'name': ceh_name,
             'time_mins': "-",
             'time_hours': "-",
@@ -272,7 +283,7 @@ def get_result_scoreboard_json(line_id: str, ctime_gmt: str) -> str:
             'checked_data': -1,
             'time_gmt': input_time_gmt,
             'error': f"Error Load Data(Error name do Not detect)",
-        })
+        }
 
     return completedjson
 
@@ -290,7 +301,7 @@ class LinesScoreboard:
     def __init__(self, line_id: int, line_enum: LINE_DATA, line_id_str: str, time_zone: TIME_ZONES):
         self.unix_last_update_time = 0
         self.time_zone = time_zone
-        self.line_data_dict = json.dumps({
+        self.line_data_dict = {
             'name': "Цех: -",
             'time_mins': "-",
             'time_hours': "-",
@@ -299,7 +310,7 @@ class LinesScoreboard:
             'checked_data': -1,
             'time_gmt': "0300",
             'error': f"Error Load Data(Error name do Not detect)",
-        })
+        }
         self.line_id_str = line_id_str
         self.line_enum = line_enum
         self.line_id = line_id
@@ -309,6 +320,13 @@ class LinesScoreboard:
         print(f"Линия создана scoreb. LINE_ID: {line_id}")
 
     #####################################################
+    def get_params(self, parms: str):
+        if len(parms) > 0:
+            data = self.line_data_dict.get(parms, None)
+            if data is not None:
+                return data
+        return False
+
     def get_line_id_str(self) -> str:
         return self.line_id_str
 
@@ -344,6 +362,16 @@ class LinesScoreboard:
     def get_time(self) -> int:
         return self.unix_last_update_time
 
+    @classmethod
+    def find_scorebar_line_id(cls, line_id: str):
+        lines_list_unit = cls.get_lines_list()
+
+        for current_unit in lines_list_unit:
+            if current_unit.get_line_id_str() == line_id:
+                return current_unit
+
+        return None
+
     #####################################################
 
 
@@ -354,12 +382,12 @@ class LinesDashboard:
     def __init__(self, line_id: int, line_enum: LINE_DATA, line_id_str: str, time_zone: TIME_ZONES):
         self.unix_last_update_time = 0
 
-        self.line_data_dict = json.dumps({
+        self.line_data_dict = {
             'in_hour': {'08': 0},
             'in_five_mins': {'08:00': 0},
             'day_plane': 777,
             'line_id': 0
-        })
+        }
         self.time_zone = time_zone
         self.line_id_str = line_id_str
         self.line_enum = line_enum
@@ -450,7 +478,6 @@ def on_update_scorebar():
 
 
 def on_update_dashboard():
-
     global load_dashboard
     if load_dashboard == 0:
         LinesDashboard(1, LINE_DATA.LINE_VRN_0, "1", TIME_ZONES.RUSSIA)

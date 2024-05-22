@@ -335,6 +335,7 @@ function CreateChartHandlersData()
             {
                 for(let i= 0; i < data.length; i++)
                 {
+                    console.log(data);
                     let data_arr = data[i][0]
                     if(Array.isArray(data_arr))
                     {
@@ -348,6 +349,18 @@ function CreateChartHandlersData()
                             {
                                 continue;
                             }
+                            let fact = data[i][1]
+                            let speedPH = data[i][2]
+                            let forecastDay = data[i][3]
+                            //
+                            findObjectID.SetParams(PARAMS_ID.LINE_DAY_FACT,
+                                fact);
+                            findObjectID.SetParams(PARAMS_ID.LINE_HOUR_FACT_SPEED,
+                                speedPH);
+                            findObjectID.SetParams(PARAMS_ID.LINE_DAY_FORECAST,
+                                forecastDay);
+                            //
+
                             findObjectID.SetParams(PARAMS_ID.LINE_DAY_PLANE,
                                 data_arr[INCOMMING_ARR_TYPE.DAY_PLANE]);
 
@@ -712,6 +725,7 @@ function StoredData(unit_line)
         chartID.options.plugins.annotation.annotations.label.yMin = hourPlane;
         chartID.options.plugins.annotation.annotations.label.yMax = hourPlane;
 
+        let dayPlane = unit_line.GetParams(PARAMS_ID.LINE_DAY_PLANE);
         let dayFact = unit_line.GetParams(PARAMS_ID.LINE_DAY_FACT);
         let factSpeed = unit_line.GetParams(PARAMS_ID.LINE_HOUR_FACT_SPEED);
         let dayForecast = unit_line.GetParams(PARAMS_ID.LINE_DAY_FORECAST);
@@ -729,9 +743,11 @@ function StoredData(unit_line)
         // tvCSSAverageFactOnHour = ConvertCssColorForRGB(tvCSSAverageFactOnHour);
         // tvCSSForecastOnDay = ConvertCssColorForRGB(tvCSSForecastOnDay);
 
-        let dayPlane = unit_line.GetParams(PARAMS_ID.LINE_DAY_PLANE);
         let obj = {
             dayPlane,
+            dayFact,
+            factSpeed,
+            dayForecast
     }
 
         chartID.options.plugins.subtitle.text = SetMakeScoreString(obj);
