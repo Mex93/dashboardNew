@@ -2,11 +2,11 @@ from flask import Flask, render_template, request, url_for, json
 from datetime import datetime
 import threading
 
-from enums import LINE_DATA
+from enum_defines import LINE_DATA
 from scoreboard.CScoreboard import CScore
 from scoreboard.CDashboard import CDashboard
 from scoreboard.common import CCommon
-from sql.enums import TIME_ZONES
+from sql.enum_defines import TIME_ZONES
 
 app = Flask(__name__)
 

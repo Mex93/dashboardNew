@@ -1,5 +1,5 @@
 import psycopg2.extras
-import sql.enums as cenum
+import sql.enum_defines as cenum
 
 
 class NotConnectToDB(Exception):

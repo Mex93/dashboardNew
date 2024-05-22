@@ -11,9 +11,9 @@ class SQL_CONNECT_DATA_TYPE(IntEnum):
 
 
 class CONNECT_DB_TYPE(IntEnum):
-    NONE = auto(),
-    LOCAL = auto(),
-    LINE = auto()
+    NONE = 0,
+    LOCAL = 1,
+    LINE = 2
 
 
 class TIME_ZONES(IntEnum):

@@ -3,12 +3,12 @@ from datetime import timedelta
 # Приём json запроса
 
 from sql.CSQLAgent import CSqlAgent
-from sql.enums import TIME_ZONES, CONNECT_DB_TYPE
+from sql.enum_defines import TIME_ZONES, CONNECT_DB_TYPE
 
 from sql.sql_data import SQL_TABLE_NAME
 from sql.sql_data import ASSEMBLED_TABLE_FIELDS
 from sql.CSQL import NotConnectToDB, ErrorSQLQuery, ErrorSQLData
-from scoreboard.enums import JOB_TYPE, LINE_ID
+from scoreboard.enum_defines import JOB_TYPE, LINE_ID
 from scoreboard.common import CCommon
 from scoreboard.CData import CData
 

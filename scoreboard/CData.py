@@ -1,13 +1,13 @@
 
 
-from scoreboard.enums import LINE_ID, JOB_TIME, JOB_BREAK_ARRAY_DATA
+from scoreboard.enum_defines import LINE_ID, JOB_TIME, JOB_BREAK_ARRAY_DATA
 from scoreboard.common import CCommon
-from sql.enums import CONNECT_DB_TYPE, TIME_ZONES
+from sql.enum_defines import CONNECT_DB_TYPE, TIME_ZONES
 from sql.CSQL import NotConnectToDB, ErrorSQLQuery, ErrorSQLData
 
 from sql.CSQLAgent import CSqlAgent
 from sql.sql_data import PLAN_TABLE_FIELDS, SQL_TABLE_NAME
-from scoreboard.enums import BREAK_TYPE, JOB_TYPE, BREAK_ARRAY_DATA
+from scoreboard.enum_defines import BREAK_TYPE, JOB_TYPE, BREAK_ARRAY_DATA
 
 from log.Clog import Clog
 

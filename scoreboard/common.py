@@ -1,5 +1,5 @@
-from scoreboard.enums import LINE_ID, BREAK_TYPE
-from sql.enums import TIME_ZONES
+from scoreboard.enum_defines import LINE_ID, BREAK_TYPE
+from sql.enum_defines import TIME_ZONES
 
 from datetime import timedelta
 from datetime import datetime, timezone

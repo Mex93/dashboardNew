@@ -1,8 +1,8 @@
 from datetime import timedelta
 
-from scoreboard.enums import JOB_TYPE, JOB_STATUS, LINE_ID, BREAK_TYPE, DATA_SCORE_TYPE, JOB_TIME
+from scoreboard.enum_defines import JOB_TYPE, JOB_STATUS, LINE_ID, BREAK_TYPE, DATA_SCORE_TYPE, JOB_TIME
 
-from sql.enums import CONNECT_DB_TYPE, TIME_ZONES
+from sql.enum_defines import CONNECT_DB_TYPE, TIME_ZONES
 from sql.CSQL import NotConnectToDB, ErrorSQLQuery, ErrorSQLData
 
 from sql.CSQLAgent import CSqlAgent
