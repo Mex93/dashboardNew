@@ -503,4 +503,4 @@ def on_update_dashboard():
 
 if __name__ == "__main__":
     start_timers(3)
-    app.run(debug=False)
+    app.run(debug=True)

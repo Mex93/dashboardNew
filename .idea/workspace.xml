@@ -5,17 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="0763ca10-79a3-416a-88f1-f9ae49a0d658" name="Changes" comment="Делаю Дашборд">
+      <change afterPath="$PROJECT_DIR$/wsgi.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/app.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/enums.py" beforeDir="false" afterPath="$PROJECT_DIR$/enum_defines.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scoreboard/CDashboard.py" beforeDir="false" afterPath="$PROJECT_DIR$/scoreboard/CDashboard.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scoreboard/CData.py" beforeDir="false" afterPath="$PROJECT_DIR$/scoreboard/CData.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scoreboard/CScoreboard.py" beforeDir="false" afterPath="$PROJECT_DIR$/scoreboard/CScoreboard.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scoreboard/common.py" beforeDir="false" afterPath="$PROJECT_DIR$/scoreboard/common.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scoreboard/enums.py" beforeDir="false" afterPath="$PROJECT_DIR$/scoreboard/enum_defines.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/sql/CSQL.py" beforeDir="false" afterPath="$PROJECT_DIR$/sql/CSQL.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/sql/CSQLAgent.py" beforeDir="false" afterPath="$PROJECT_DIR$/sql/CSQLAgent.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/sql/enums.py" beforeDir="false" afterPath="$PROJECT_DIR$/sql/enum_defines.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -60,6 +52,7 @@
     "Python.dashboardNew.executor": "Run",
     "Python.main.executor": "Run",
     "Python.sql_data.executor": "Run",
+    "Python.wsgi.executor": "Run",
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "WebServerToolWindowFactoryState": "false",
@@ -150,11 +143,6 @@
       </runOnlyEnvs>
       <method v="2" />
     </configuration>
-    <recent_temporary>
-      <list>
-        <item itemvalue="Python.app" />
-      </list>
-    </recent_temporary>
   </component>
   <component name="SharedIndexes">
     <attachedChunks>
@@ -176,7 +164,7 @@
       <workItem from="1714980022706" duration="255000" />
       <workItem from="1714980290101" duration="62000" />
       <workItem from="1714981068606" duration="1815000" />
-      <workItem from="1716207910776" duration="10770000" />
+      <workItem from="1716207910776" duration="11119000" />
     </task>
     <task id="LOCAL-00001" summary="first">
       <option name="closed" value="true" />
