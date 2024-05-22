@@ -41,7 +41,7 @@ class CData:
 
             local_sql = CSqlAgent(self.current_time_zone)
             try:
-                result = local_sql.connect_to_db(CONNECT_DB_TYPE.LOCAL)
+                result = local_sql.connect_to_db(CONNECT_DB_TYPE.LOCAL, self.current_time_zone)
                 sql_handle = local_sql.get_sql_handle()
                 Clog.lprint(f"Подключение к БД(CData -> get_data_for_line): CONNECT_DB_TYPE.LOCAL [sql_handle: {sql_handle}]")
                 if result:

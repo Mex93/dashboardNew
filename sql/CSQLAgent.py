@@ -1,26 +1,31 @@
 from sql.CSQL import csql_eng, ErrorSQLData, ErrorSQLQuery, NotConnectToDB
 import sql.enums as cenum
-from sql.config import db_standart_connect_params, db_assembly_connect_params
+from sql.config import db_standart_connect_params, db_assembly_connect_params_kz, db_assembly_connect_params_vrn
+from sql.enums import TIME_ZONES
 
 
 class CSqlAgent(csql_eng):
-    def __init__(self, time_zone: cenum.TIME_ZONES):
+    def __init__(self, time_zone: TIME_ZONES):
         super().__init__()
 
         self.__connect_handle = False
 
-        self.__sql_data_line = db_assembly_connect_params
+        self.__sql_data_line_kz = db_assembly_connect_params_kz
+        self.__sql_data_line_vrn = db_assembly_connect_params_vrn
         self.__sql_data_local = db_standart_connect_params
         self.__time_zone = time_zone
 
     def get_sql_handle(self):
         return self.__connect_handle
 
-    def connect_to_db(self, connect_db_type: cenum.CONNECT_DB_TYPE) -> bool:
+    def connect_to_db(self, connect_db_type: cenum.CONNECT_DB_TYPE, unused) -> bool:
         if self.__connect_handle is False:
 
             if connect_db_type == cenum.CONNECT_DB_TYPE.LINE:
-                self.set_connect_data(self.__sql_data_line)
+                if self.__time_zone == TIME_ZONES.RUSSIA:
+                    self.set_connect_data(self.__sql_data_line_vrn)
+                elif self.__time_zone == TIME_ZONES.KZ:
+                    self.set_connect_data(self.__sql_data_line_kz)
             elif connect_db_type == cenum.CONNECT_DB_TYPE.LOCAL:
                 self.set_connect_data(self.__sql_data_local)
             else:

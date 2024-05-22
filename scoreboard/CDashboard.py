@@ -240,7 +240,7 @@ class CDashboard:
         if sql_line_id:
             global_sql = CSqlAgent(self.current_time_zone)
             try:
-                result = global_sql.connect_to_db(CONNECT_DB_TYPE.LINE)
+                result = global_sql.connect_to_db(CONNECT_DB_TYPE.LINE, self.current_time_zone)
                 sql_handle = global_sql.get_sql_handle()
                 Clog.lprint(
                     f"Подключение к БД(CDashboard -> get_points): CONNECT_DB_TYPE.LINE [sql_handle: {sql_handle}]")
@@ -318,9 +318,9 @@ class CDashboard:
                     else:
                         query_string = (
                             f"SELECT "
-                            f"date_bin('5 min', {ASSEMBLED_TABLE_FIELDS.fd_completed_date}, "
+                            f"date_bin('5 min', check_report.check_timestamp, "
                             f"'2022-1-1') AS ts_date_interval, "
-                            "COUNT(DISTINCT check_report.assy_id) as tv_count_on_5min"
+                            "COUNT(DISTINCT check_report.assy_id) as tv_count_on_5min "
                             "FROM check_report "
                             "JOIN check_description ON check_report.check_id = check_description.check_id "
                             "WHERE check_report.check_param_0 = 'PASS' AND "

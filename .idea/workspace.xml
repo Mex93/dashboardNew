@@ -8,6 +8,10 @@
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/app.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/scoreboard/CDashboard.py" beforeDir="false" afterPath="$PROJECT_DIR$/scoreboard/CDashboard.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scoreboard/CData.py" beforeDir="false" afterPath="$PROJECT_DIR$/scoreboard/CData.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scoreboard/CScoreboard.py" beforeDir="false" afterPath="$PROJECT_DIR$/scoreboard/CScoreboard.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/sql/CSQLAgent.py" beforeDir="false" afterPath="$PROJECT_DIR$/sql/CSQLAgent.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/static/js/dashboard_client.js" beforeDir="false" afterPath="$PROJECT_DIR$/static/js/dashboard_client.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -163,7 +167,7 @@
       <workItem from="1714980022706" duration="255000" />
       <workItem from="1714980290101" duration="62000" />
       <workItem from="1714981068606" duration="1815000" />
-      <workItem from="1716207910776" duration="7473000" />
+      <workItem from="1716207910776" duration="8075000" />
     </task>
     <task id="LOCAL-00001" summary="first">
       <option name="closed" value="true" />

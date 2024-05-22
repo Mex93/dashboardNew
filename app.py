@@ -436,14 +436,12 @@ def on_update_scorebar():
         LinesScoreboard(3, LINE_DATA.LINE_VRN_2, "3", TIME_ZONES.RUSSIA)
         LinesScoreboard(4, LINE_DATA.LINE_VRN_3, "4", TIME_ZONES.RUSSIA)
 
-        LinesScoreboard(5, LINE_DATA.LINE_KZ_0, "5", TIME_ZONES.RUSSIA)
+        LinesScoreboard(5, LINE_DATA.LINE_KZ_0, "5", TIME_ZONES.KZ)
         load_scoreboard = 1
 
     lines_list_unit = LinesScoreboard.get_lines_list()
     for current_unit in lines_list_unit:
         clineid = current_unit.get_line_id_str()
-        if clineid == '5':  # временно
-            continue
         time_zone = current_unit.get_time_zone()
         current_unit.update_time()
         result = get_result_scoreboard_json(clineid, time_zone)
@@ -460,7 +458,7 @@ def on_update_dashboard():
         LinesDashboard(3, LINE_DATA.LINE_VRN_2, "3", TIME_ZONES.RUSSIA)
         LinesDashboard(4, LINE_DATA.LINE_VRN_3, "4", TIME_ZONES.RUSSIA)
 
-        LinesDashboard(5, LINE_DATA.LINE_KZ_0, "5", TIME_ZONES.RUSSIA)
+        LinesDashboard(5, LINE_DATA.LINE_KZ_0, "5", TIME_ZONES.KZ)
         load_dashboard = 1
 
     lines_list_unit = LinesDashboard.get_lines_list()
@@ -468,15 +466,12 @@ def on_update_dashboard():
     results_line = []
     for current_unit in lines_list_unit:
         cline_id = current_unit.get_line_id_str()
-        if cline_id == '5':  # временно
-            continue
         time_zone = current_unit.get_time_zone()
         result = get_result_dashboard_json(cline_id, time_zone)
         current_unit.update_dashb_data(result)
         results_line.append([result])
 
     start_timers(2)
-
 
 
 if __name__ == "__main__":

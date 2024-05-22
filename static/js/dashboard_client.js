@@ -338,7 +338,7 @@ function CreateChartHandlersData()
                     let data_arr = data[i][0]
                     if(Array.isArray(data_arr))
                     {
-                        console.log(data_arr);
+                        //console.log(data_arr);
                         let lineID = data_arr[INCOMMING_ARR_TYPE.LINEID];
                         let findObjectID = LineParams.GetObjectIDFromLineID(CLines_obj,lineID);
 

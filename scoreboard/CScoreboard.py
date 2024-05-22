@@ -69,7 +69,7 @@ class CScore:
 
             global_sql = CSqlAgent(self.current_time_zone)
             try:
-                result = global_sql.connect_to_db(CONNECT_DB_TYPE.LINE)
+                result = global_sql.connect_to_db(CONNECT_DB_TYPE.LINE, self.current_time_zone)
                 sql_handle = global_sql.get_sql_handle()
                 Clog.lprint(
                     f"Подключение к БД(CScore -> get_12hours_data): CONNECT_DB_TYPE.LINE [sql_handle: {sql_handle}]")
@@ -146,7 +146,7 @@ class CScore:
 
             global_sql = CSqlAgent(self.current_time_zone)
             try:
-                result = global_sql.connect_to_db(CONNECT_DB_TYPE.LINE)
+                result = global_sql.connect_to_db(CONNECT_DB_TYPE.LINE, self.current_time_zone)
                 sql_handle = global_sql.get_sql_handle()
                 Clog.lprint(
                     f"Подключение к БД(CScore -> get_hours_score): CONNECT_DB_TYPE.LINE [sql_handle: {sql_handle}]")
@@ -255,7 +255,7 @@ class CScore:
             global_sql = CSqlAgent(self.current_time_zone)
 
             try:
-                result = global_sql.connect_to_db(CONNECT_DB_TYPE.LINE)
+                result = global_sql.connect_to_db(CONNECT_DB_TYPE.LINE, self.current_time_zone)
                 sql_handle = global_sql.get_sql_handle()
                 Clog.lprint(
                     f"Подключение к БД(CScore -> get_end_job_score): CONNECT_DB_TYPE.LINE [sql_handle: {sql_handle}]")
