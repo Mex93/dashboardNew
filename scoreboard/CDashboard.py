@@ -314,7 +314,6 @@ class CDashboard:
                             "GROUP BY 1 "
                             "ORDER BY 1 "
                             "LIMIT 144")  # 12 * 12 сколько по 5 минут каждый час в часу
-                        print(time_line_start)
 
                     else:
                         query_string = (

@@ -1,5 +1,7 @@
 from flask import Flask, render_template, request, url_for, json
 from datetime import datetime
+import threading
+
 from enums import LINE_DATA
 
 app = Flask(__name__)
@@ -9,8 +11,8 @@ app.config['TESTING'] = True
 app.config['WTF_CSRF_ENABLED'] = True
 debug = False
 
-load = 0
-
+load_scoreboard = 0
+load_dashboard = 0
 
 @app.route('/logo.ico')
 def favicon():
@@ -21,11 +23,6 @@ def favicon():
 def getsize():
     return render_template('psize.html')
 
-
-# @app.route('/scoreboard/<int:gmt_time>/<int:changed_line_id>')
-# @app.route('/sb/<int:gmt_time>/<int:changed_line_id>')
-# def scoreboard(gmt_time, changed_line_id):
-#     return render_template('scoreboard.html', time_gmt=gmt_time, line_id=changed_line_id)
 
 @app.route('/kz')
 def get_kz():
@@ -47,33 +44,13 @@ def get_line_scorebar(line_id):
 def scorebar():
     # надо как то запретить переход по прямой ссылке к файлу
 
-    time_gmt = request.args['ctime_gmt']
-
     clineid = request.args['cline_id']
-
-    global load
-    if load == 0:
-        LinesScoreboard(1, LINE_DATA.LINE_VRN_0, "1")
-        LinesScoreboard(2, LINE_DATA.LINE_VRN_1, "2")
-        LinesScoreboard(3, LINE_DATA.LINE_VRN_2, "3")
-        LinesScoreboard(4, LINE_DATA.LINE_VRN_3, "4")
-
-        LinesScoreboard(5, LINE_DATA.LINE_KZ_0, "5")
-        load = 1
 
     lines_list_unit = LinesScoreboard.get_lines_list()
 
     for current_unit in lines_list_unit:
         if current_unit.get_line_id_str() == clineid:
-
-            if current_unit.get_time() > get_current_unix_time():
-                return current_unit.get_score_data()
-            else:
-                current_unit.update_time()
-
-                result = get_result_scoreboard_json(clineid, time_gmt)
-                current_unit.update_score_data(result)
-                return result
+            return current_unit.get_score_data()
 
     return json.dumps({
         'name': "Цех: -",
@@ -119,27 +96,14 @@ def dashboard():
     else:
         html_type = "all"
 
-    global load
-    if load == 0:
-        LinesDashboard(1, LINE_DATA.LINE_VRN_0, "1")
-        LinesDashboard(2, LINE_DATA.LINE_VRN_1, "2")
-        LinesDashboard(3, LINE_DATA.LINE_VRN_2, "3")
-        LinesDashboard(4, LINE_DATA.LINE_VRN_3, "4")
-
-        LinesDashboard(5, LINE_DATA.LINE_KZ_0, "5")
-        load = 1
-
     lines_list_unit = LinesDashboard.get_lines_list()
 
     if html_type == "kz":
         lines = ['5']
-        time_gmt = 2
     elif html_type == "vrn":
         lines = ['1', '2', '3', '4']
-        time_gmt = 1
     elif html_type == "all":
         lines = ['1', '2', '3', '4', '5']
-        time_gmt = 1
     else:
         return False
 
@@ -153,16 +117,9 @@ def dashboard():
     for current_unit in lines_list_unit:
         cline_id = current_unit.get_line_id_str()
         if get_find(lines, cline_id):
-
-            if current_unit.get_time() < get_current_unix_time():
-                current_unit.update_time()
-                result = get_result_dashboard_json(cline_id, time_gmt)
-                current_unit.update_dashb_data(result)
-
             dbdata = current_unit.get_dashb_data()
             results_line.append([dbdata])
 
-    print(results_line)
     return json.dumps(results_line)
 
 
@@ -172,7 +129,7 @@ from scoreboard.common import CCommon
 from sql.enums import TIME_ZONES
 
 
-def get_result_dashboard_json(line_id: str, ctime_gmt: int) -> list:
+def get_result_dashboard_json(line_id: str, time_zone: TIME_ZONES) -> list:
     global debug
 
     if debug:
@@ -180,12 +137,6 @@ def get_result_dashboard_json(line_id: str, ctime_gmt: int) -> list:
         time_zone = TIME_ZONES.RUSSIA
     else:
         input_line_id = int(line_id)
-        input_time_gmt = ctime_gmt
-
-        if input_time_gmt == 1:
-            time_zone = TIME_ZONES.RUSSIA
-        else:
-            time_zone = TIME_ZONES.KZ
 
     # Приём json запроса
 
@@ -205,17 +156,10 @@ def get_result_dashboard_json(line_id: str, ctime_gmt: int) -> list:
     sql_line_id = CCommon.get_line_id_for_sql(line_id)
     hour_plane = 122
     if dashb_data is False:
-        print("Лайн dafalut " + str(input_line_id))
+        print(f"Получение результата DASHB по умолчанию. Линия '{line_id}'")
     else:
-        print("Лайн zaebis" + str(input_line_id))
-
+        print(f"Получение результата DASHB. Линия '{line_id}'")
         count_in_hour, result_time_dict_5mins, day_plane, hour_plane = dashb_data
-        print(count_in_hour)
-        print(result_time_dict_5mins)
-        print(day_plane)
-        print(sql_line_id)
-        print(hour_plane)
-
     return [count_in_hour, result_time_dict_5mins, day_plane, hour_plane, sql_line_id]
 
 
@@ -333,7 +277,6 @@ def get_result_scoreboard_json(line_id: str, ctime_gmt: str) -> str:
     return completedjson
 
 
-
 @app.errorhandler(404)
 def page_not_found(error_str):
     # return render_template('404.html')
@@ -344,9 +287,9 @@ class LinesScoreboard:
     active_lines = list()
     UPDATE_SECS = 10
 
-    def __init__(self, line_id: int, line_enum: LINE_DATA, line_id_str: str):
+    def __init__(self, line_id: int, line_enum: LINE_DATA, line_id_str: str, time_zone: TIME_ZONES):
         self.unix_last_update_time = 0
-
+        self.time_zone = time_zone
         self.line_data_dict = json.dumps({
             'name': "Цех: -",
             'time_mins': "-",
@@ -368,6 +311,9 @@ class LinesScoreboard:
     #####################################################
     def get_line_id_str(self) -> str:
         return self.line_id_str
+
+    def get_time_zone(self):
+        return self.time_zone
 
     def get_line_id(self) -> int:
         return self.line_id
@@ -405,7 +351,7 @@ class LinesDashboard:
     active_lines = list()
     UPDATE_SECS = 3
 
-    def __init__(self, line_id: int, line_enum: LINE_DATA, line_id_str: str):
+    def __init__(self, line_id: int, line_enum: LINE_DATA, line_id_str: str, time_zone: TIME_ZONES):
         self.unix_last_update_time = 0
 
         self.line_data_dict = json.dumps({
@@ -414,7 +360,7 @@ class LinesDashboard:
             'day_plane': 777,
             'line_id': 0
         })
-
+        self.time_zone = time_zone
         self.line_id_str = line_id_str
         self.line_enum = line_enum
         self.line_id = line_id
@@ -426,6 +372,9 @@ class LinesDashboard:
     #####################################################
     def get_line_id_str(self) -> str:
         return self.line_id_str
+
+    def get_time_zone(self):
+        return self.time_zone
 
     def get_line_id(self) -> int:
         return self.line_id
@@ -465,5 +414,71 @@ def get_current_unix_time() -> int:
     return int(unix_time.timestamp())
 
 
+def start_timers(type_of_data: int):
+    if type_of_data == 1 or type_of_data == 3:
+        timer_id = threading.Timer(10, lambda: on_update_scorebar(),
+                                   args=None, kwargs=None)
+        timer_id.start()
+
+    if type_of_data == 2 or type_of_data == 3:
+        timer_id = threading.Timer(10, lambda: on_update_dashboard(),
+                                   args=None, kwargs=None)
+        timer_id.start()
+
+
+def on_update_scorebar():
+    # надо как то запретить переход по прямой ссылке к файлу
+
+    global load_scoreboard
+    if load_scoreboard == 0:
+        LinesScoreboard(1, LINE_DATA.LINE_VRN_0, "1", TIME_ZONES.RUSSIA)
+        LinesScoreboard(2, LINE_DATA.LINE_VRN_1, "2", TIME_ZONES.RUSSIA)
+        LinesScoreboard(3, LINE_DATA.LINE_VRN_2, "3", TIME_ZONES.RUSSIA)
+        LinesScoreboard(4, LINE_DATA.LINE_VRN_3, "4", TIME_ZONES.RUSSIA)
+
+        LinesScoreboard(5, LINE_DATA.LINE_KZ_0, "5", TIME_ZONES.RUSSIA)
+        load_scoreboard = 1
+
+    lines_list_unit = LinesScoreboard.get_lines_list()
+    for current_unit in lines_list_unit:
+        clineid = current_unit.get_line_id_str()
+        if clineid == '5':  # временно
+            continue
+        time_zone = current_unit.get_time_zone()
+        current_unit.update_time()
+        result = get_result_scoreboard_json(clineid, time_zone)
+        current_unit.update_score_data(result)
+    start_timers(1)
+
+
+def on_update_dashboard():
+
+    global load_dashboard
+    if load_dashboard == 0:
+        LinesDashboard(1, LINE_DATA.LINE_VRN_0, "1", TIME_ZONES.RUSSIA)
+        LinesDashboard(2, LINE_DATA.LINE_VRN_1, "2", TIME_ZONES.RUSSIA)
+        LinesDashboard(3, LINE_DATA.LINE_VRN_2, "3", TIME_ZONES.RUSSIA)
+        LinesDashboard(4, LINE_DATA.LINE_VRN_3, "4", TIME_ZONES.RUSSIA)
+
+        LinesDashboard(5, LINE_DATA.LINE_KZ_0, "5", TIME_ZONES.RUSSIA)
+        load_dashboard = 1
+
+    lines_list_unit = LinesDashboard.get_lines_list()
+
+    results_line = []
+    for current_unit in lines_list_unit:
+        cline_id = current_unit.get_line_id_str()
+        if cline_id == '5':  # временно
+            continue
+        time_zone = current_unit.get_time_zone()
+        result = get_result_dashboard_json(cline_id, time_zone)
+        current_unit.update_dashb_data(result)
+        results_line.append([result])
+
+    start_timers(2)
+
+
+
 if __name__ == "__main__":
+    start_timers(3)
     app.run(debug=False)

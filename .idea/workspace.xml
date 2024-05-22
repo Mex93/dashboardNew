@@ -7,14 +7,7 @@
     <list default="true" id="0763ca10-79a3-416a-88f1-f9ae49a0d658" name="Changes" comment="Делаю Дашборд">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/app.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/log/Clog.py" beforeDir="false" afterPath="$PROJECT_DIR$/log/Clog.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/scoreboard/CDashboard.py" beforeDir="false" afterPath="$PROJECT_DIR$/scoreboard/CDashboard.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scoreboard/common.py" beforeDir="false" afterPath="$PROJECT_DIR$/scoreboard/common.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/static/js/dashboard_client.js" beforeDir="false" afterPath="$PROJECT_DIR$/static/js/dashboard_client.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/static/js/libs/dashboard/Classes.js" beforeDir="false" afterPath="$PROJECT_DIR$/static/js/libs/dashboard/Classes.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/dashboard_all.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/dashboard_all.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/dashboard_kz.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/dashboard_kz.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/dashboard_vrn.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/dashboard_vrn.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -43,31 +36,31 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Python.CDashboard.executor": "Run",
-    "Python.CData.executor": "Run",
-    "Python.CScore.executor": "Run",
-    "Python.CScoreboard.executor": "Run",
-    "Python.app.executor": "Run",
-    "Python.config.executor": "Run",
-    "Python.dashboardNew.executor": "Run",
-    "Python.main.executor": "Run",
-    "Python.sql_data.executor": "Run",
-    "RunOnceActivity.OpenProjectViewOnStart": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "WebServerToolWindowFactoryState": "false",
-    "git-widget-placeholder": "master",
-    "ignore.virus.scanning.warn.message": "true",
-    "last_opened_file_path": "C:/Users/Ryazanov/PycharmProjects/dashboards",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Python.CDashboard.executor&quot;: &quot;Run&quot;,
+    &quot;Python.CData.executor&quot;: &quot;Run&quot;,
+    &quot;Python.CScore.executor&quot;: &quot;Run&quot;,
+    &quot;Python.CScoreboard.executor&quot;: &quot;Run&quot;,
+    &quot;Python.app.executor&quot;: &quot;Run&quot;,
+    &quot;Python.config.executor&quot;: &quot;Run&quot;,
+    &quot;Python.dashboardNew.executor&quot;: &quot;Run&quot;,
+    &quot;Python.main.executor&quot;: &quot;Run&quot;,
+    &quot;Python.sql_data.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/Ryazanov/PycharmProjects/dashboards&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\Ryazanov\PycharmProjects\dashboardNew" />
@@ -170,7 +163,7 @@
       <workItem from="1714980022706" duration="255000" />
       <workItem from="1714980290101" duration="62000" />
       <workItem from="1714981068606" duration="1815000" />
-      <workItem from="1716207910776" duration="6685000" />
+      <workItem from="1716207910776" duration="7473000" />
     </task>
     <task id="LOCAL-00001" summary="first">
       <option name="closed" value="true" />
@@ -340,21 +333,5 @@
     <MESSAGE value="Сделано кеширование и исправление бага с концом смены" />
     <MESSAGE value="Делаю Дашборд" />
     <option name="LAST_COMMIT_MESSAGE" value="Делаю Дашборд" />
-  </component>
-  <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/app.py</url>
-          <line>342</line>
-          <option name="timeStamp" value="1" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/app.py</url>
-          <line>174</line>
-          <option name="timeStamp" value="3" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
   </component>
 </project>
