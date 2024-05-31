@@ -17,6 +17,7 @@ debug = False
 
 load_scoreboard = 0
 load_dashboard = 0
+DEFAULT_LINES_LIST = "1, 2, 3, 4, 5"
 
 
 @app.route('/logo.ico')
@@ -88,56 +89,60 @@ def dashboard_all():
     return render_template('dashboard_all.html')
 
 
+@app.route('/get_db_<string:line_id>')
+def get_line_float(line_id):
+    lines = line_id.split(",")
+    success = True
+    if isinstance(lines, list):
+        for i, line in enumerate(lines, 0):
+
+            if not line.isdigit():
+                success = False
+                break
+
+            line_int = int(line)
+            if not line_int.is_integer():
+                success = False
+                break
+
+            lines[i] = line_int
+            lines = lines
+
+        if success:
+            print(lines)
+            return render_template('dashboard_all.html', checked_lines=line_id)
+
+    return render_template('dashboard_all.html', checked_lines=DEFAULT_LINES_LIST)
+
+
 @app.route('/engine_scripts/py/launch_scripts/dashboard_get_stats.py', methods=['GET', 'POST'])
 def dashboard():
     # надо как то запретить переход по прямой ссылке к файлу
 
-    chtml_type = request.args['chtml_type']
-
-    html_type = int(chtml_type)
-    if html_type == 1:
-        html_type = "kz"
-    elif html_type == 2:
-        html_type = "vrn"
-    else:
-        html_type = "all"
+    line_id = str(request.args['line_id'])
 
     lines_list_unit = LinesDashboard.get_lines_list()
 
-    if html_type == "kz":
-        lines = ['5']
-    elif html_type == "vrn":
-        lines = ['1', '2', '3', '4']
-    elif html_type == "all":
-        lines = ['1', '2', '3', '4', '5']
-    else:
-        return False
-
-    def get_find(lineslist: list, cur_lines: str) -> bool:
-        for line in lineslist:
-            if line == cur_lines:
-                return True
-        return False
-
-    results_line = []
     for current_unit in lines_list_unit:
         cline_id = current_unit.get_line_id_str()
-        if get_find(lines, cline_id):
-            dbdata = current_unit.get_dashb_data()
-            score_unit = LinesScoreboard.find_scorebar_line_id(cline_id)
-            if score_unit is not None:
-                fact = score_unit.get_params("TV")
-                if not isinstance(fact, int):
-                    fact = -1
-                speed_per_hours = score_unit.get_params("av_speed")
-                if not isinstance(speed_per_hours, int):
-                    speed_per_hours = -1
-                day_forecast = score_unit.get_params("forecast_TV")
-                if not isinstance(day_forecast, int):
-                    day_forecast = -1
-                results_line.append([dbdata, fact, speed_per_hours, day_forecast])
+        if cline_id != line_id:
+            continue
+        dbdata = current_unit.get_dashb_data()
+        score_unit = LinesScoreboard.find_scorebar_line_id(cline_id)
+        if score_unit is not None:
+            fact = score_unit.get_params("TV")
+            if not isinstance(fact, int):
+                fact = -1
+            speed_per_hours = score_unit.get_params("av_speed")
+            if not isinstance(speed_per_hours, int):
+                speed_per_hours = -1
+            day_forecast = score_unit.get_params("forecast_TV")
+            if not isinstance(day_forecast, int):
+                day_forecast = -1
+            results_line = [dbdata, fact, speed_per_hours, day_forecast, line_id]
+            return json.dumps(results_line)
 
-    return json.dumps(results_line)
+    return json.dumps([[], 0, 0, 6666])
 
 
 def get_result_dashboard_json(line_id: str, time_zone: TIME_ZONES) -> list:
