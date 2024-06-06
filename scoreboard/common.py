@@ -36,17 +36,10 @@ class CCommon:
     @staticmethod
     def get_line_id_for_sql(line_id: LINE_ID) -> int | bool:
 
-        match line_id:
-            case LINE_ID.LINE_KZ_ONE:
-                return 5
-            case LINE_ID.LINE_VRN_ONE:
-                return 1
-            case LINE_ID.LINE_VRN_TWO:
-                return 2
-            case LINE_ID.LINE_VRN_TRI:
-                return 3
-            case LINE_ID.LINE_VRN_FOUR:
-                return 4
+        for line in LINE_ID:
+            if line == line_id:
+                return line.value
+
         return False
 
     @staticmethod
@@ -60,23 +53,28 @@ class CCommon:
             return TIME_ZONES.RUSSIA
         elif line_id == LINE_ID.LINE_KZ_ONE:
             return TIME_ZONES.KZ
+
+        elif line_id in (
+                       LINE_ID.LINE_LINE_REZERV_1,
+                       LINE_ID.LINE_LINE_REZERV_2,
+                       LINE_ID.LINE_LINE_REZERV_3,
+                       LINE_ID.LINE_LINE_REZERV_4,
+                       LINE_ID.LINE_LINE_REZERV_5,
+                       LINE_ID.LINE_LINE_REZERV_6,
+                       LINE_ID.LINE_LINE_REZERV_7,
+                       LINE_ID.LINE_LINE_REZERV_8,
+                       LINE_ID.LINE_LINE_REZERV_9,
+                       ):
+            return TIME_ZONES.RUSSIA
         else:
             return TIME_ZONES.NONE
 
     @staticmethod
     def get_line_id_type_from_line_id(line_id: int) -> LINE_ID | bool:
 
-        match line_id:
-            case 5:
-                return LINE_ID.LINE_KZ_ONE
-            case 1:
-                return LINE_ID.LINE_VRN_ONE
-            case 2:
-                return LINE_ID.LINE_VRN_TWO
-            case 3:
-                return LINE_ID.LINE_VRN_TRI
-            case 4:
-                return LINE_ID.LINE_VRN_FOUR
+        for line in LINE_ID:  # line.name ?
+            if line.value == line_id:
+                return line
         return False
 
     @staticmethod

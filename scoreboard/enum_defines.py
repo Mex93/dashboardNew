@@ -2,12 +2,21 @@ from enum import IntEnum
 
 
 class LINE_ID(IntEnum):
-    LINE_NONE = -1,
-    LINE_VRN_ONE = 0,
-    LINE_VRN_TWO = 1,
+    LINE_NONE = 0,
+    LINE_VRN_ONE = 1,
+    LINE_VRN_TWO = 2,
     LINE_VRN_TRI = 3,
     LINE_VRN_FOUR = 4,
-    LINE_KZ_ONE = 5
+    LINE_KZ_ONE = 5,
+    LINE_LINE_REZERV_1 = 6,
+    LINE_LINE_REZERV_2 = 7,
+    LINE_LINE_REZERV_3 = 8,
+    LINE_LINE_REZERV_4 = 9,
+    LINE_LINE_REZERV_5 = 10,
+    LINE_LINE_REZERV_6 = 11,
+    LINE_LINE_REZERV_7 = 12,
+    LINE_LINE_REZERV_8 = 13,
+    LINE_LINE_REZERV_9 = 14,
 
 
 class JOB_TYPE(IntEnum):

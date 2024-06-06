@@ -182,7 +182,7 @@ function getLinesData()
                     // console.log(data)
                     if(Array.isArray(data))
                     {
-                        console.log(data)
+                        //console.log(data)
                         //
                         let unitID = null;
                         let hoursPoints = null;

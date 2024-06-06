@@ -19,9 +19,6 @@ debug = False
 
 load_scoreboard = 0
 load_dashboard = 0
-DEFAULT_LINES_LIST = "1, 2, 3, 4, 5"
-DEFAULT_LINES = [1, 2, 3, 4, 5]
-
 
 @app.route('/logo.ico')
 def favicon():
@@ -57,14 +54,14 @@ def scorebar():
             return json.dumps(data)
 
     return json.dumps({
-        'name': "Цех: -",
-        'time_mins': "-",
-        'time_hours': "-",
-        'status_txt': "Error Check Data...",
-        'title': "Цех: -",
+        'name': "Цех: ?",
+        'time_mins': "0",
+        'time_hours': "0",
+        'status_txt': f"Указанная линия '{clineid}' не найдена...",
+        'title': "Цех: Неизвестно",
         'checked_data': -1,
         'time_gmt': "0300",
-        'error': f"Error Load Data(Error name do Not detect)",
+        'error': f"Error Load Data(current Line '{clineid}' is not detected)",
     })
 
 
@@ -89,10 +86,9 @@ def dashboard_all():
 @app.route('/get_db_<string:line_id>')
 def get_line_str(line_id):
     lines = line_id.split(",")
-    success = True
 
-    def find_line(cline_id: int):
-        for find in DEFAULT_LINES:
+    def find_line_repeat(line_list: list, cline_id: str):
+        for find in line_list:
             if find == cline_id:
                 return True
         return False
@@ -103,25 +99,30 @@ def get_line_str(line_id):
         for i, line in enumerate(lines, 0):
 
             if not line.isdigit():
-                success = False
-                break
+                continue
 
             line_int = int(line)
-            if not line_int.is_integer():
-                success = False
-                break
+            if not isceloe(line_int):
+                continue
 
-            if not find_line(line_int):
+            if not Lines.is_line_valid(line_int):
+                continue
+
+            if find_line_repeat(lines_getting_list, str(line_int)):
                 continue
 
             lines_getting_list.append(str(line_int))
 
-        if success:
+        if len(lines_getting_list) > 0:
             list_str = ",".join(lines_getting_list)
             #  print(lines)
             return render_template('dashboard_all.html', checked_lines=list_str)
 
-    return render_template('dashboard_all.html', checked_lines=DEFAULT_LINES_LIST)
+    return render_template('dashboard_all.html', checked_lines=Lines.get_line_str())
+
+
+def isceloe(x):
+    return x % 1 == 0
 
 
 @app.route('/engine_scripts/py/launch_scripts/dashboard_get_stats.py', methods=['GET', 'POST'])
@@ -474,8 +475,10 @@ def on_update_scorebar():
         count = 0
         for line_arr in line_list:
             line_id = line_arr[0]
+
             time_zone = line_arr[1]
             LinesScoreboard(line_id, time_zone)
+            Lines(line_id)
             count += 1
 
         if count:
@@ -512,6 +515,48 @@ def on_update_dashboard():
         results_line.append([result])
 
     start_timers(2)
+
+
+class Lines:
+    lines_list = list()
+
+    def __init__(self, line_id: int):
+        self.line_id = line_id
+        self.lines_list.append(self)
+
+    @classmethod
+    def get_line_list(cls) -> None | list:
+        list_lines = list()
+
+        for unit in cls.lines_list:
+            line_id = unit.get_line_id()
+            list_lines.append(line_id)
+
+        if len(list_lines) > 0:
+            return list_lines
+
+        return None
+
+    @classmethod
+    def get_line_str(cls) -> None | str:
+        lines = cls.get_line_list()
+        if lines is not None:
+            if len(lines) > 0:
+                lstr = ",".join(lines)
+                return lstr
+        return "1, 2, 3, 4, 5"
+
+    def get_line_id(self):
+        return self.line_id
+
+    @classmethod
+    def is_line_valid(cls, line_id: int) -> bool:
+        lines = cls.get_line_list()
+        if lines is not None:
+            for line in lines:
+                if line == line_id:
+                    return True
+        return False
 
 
 if __name__ == "__main__":

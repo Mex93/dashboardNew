@@ -4,22 +4,13 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="0763ca10-79a3-416a-88f1-f9ae49a0d658" name="Changes" comment="Делаю Дашборд">
+    <list default="true" id="0763ca10-79a3-416a-88f1-f9ae49a0d658" name="Changes" comment="Через запятую">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/app.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scoreboard/CDashboard.py" beforeDir="false" afterPath="$PROJECT_DIR$/scoreboard/CDashboard.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scoreboard/CData.py" beforeDir="false" afterPath="$PROJECT_DIR$/scoreboard/CData.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scoreboard/CScoreboard.py" beforeDir="false" afterPath="$PROJECT_DIR$/scoreboard/CScoreboard.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/scoreboard/common.py" beforeDir="false" afterPath="$PROJECT_DIR$/scoreboard/common.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/sql/CSQLAgent.py" beforeDir="false" afterPath="$PROJECT_DIR$/sql/CSQLAgent.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/sql/sql_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/sql/sql_data.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scoreboard/enum_defines.py" beforeDir="false" afterPath="$PROJECT_DIR$/scoreboard/enum_defines.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/static/css/scoreboard/tv.css" beforeDir="false" afterPath="$PROJECT_DIR$/static/css/scoreboard/tv.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/static/js/dashboard_client.js" beforeDir="false" afterPath="$PROJECT_DIR$/static/js/dashboard_client.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/static/js/libs/dashboard/utils.js" beforeDir="false" afterPath="$PROJECT_DIR$/static/js/libs/dashboard/utils.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/static/js/scorebar_client.js" beforeDir="false" afterPath="$PROJECT_DIR$/static/js/scorebar_client.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/dashboard_all.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/dashboard_all.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/dashboard_kz.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/dashboard_vrn.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/scoreboard.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/scoreboard.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -85,6 +76,7 @@
       <recent name="C:\Users\Ryazanov\PycharmProjects\dashboardNew" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\Ryazanov\PycharmProjects\dashboardNew\static\css\scoreboard" />
       <recent name="C:\Users\Ryazanov\PycharmProjects\dashboardNew\scoreboard" />
       <recent name="C:\Users\Ryazanov\PycharmProjects\dashboardNew\dashboard" />
       <recent name="C:\Users\Ryazanov\PycharmProjects\dashboardNew\log" />
@@ -341,7 +333,15 @@
       <option name="project" value="LOCAL" />
       <updated>1717162531097</updated>
     </task>
-    <option name="localTasksCounter" value="21" />
+    <task id="LOCAL-00021" summary="Через запятую">
+      <option name="closed" value="true" />
+      <created>1717663168816</created>
+      <option name="number" value="00021" />
+      <option name="presentableId" value="LOCAL-00021" />
+      <option name="project" value="LOCAL" />
+      <updated>1717663168816</updated>
+    </task>
+    <option name="localTasksCounter" value="22" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -364,6 +364,7 @@
     <MESSAGE value="Сделано кеширование" />
     <MESSAGE value="Сделано кеширование и исправление бага с концом смены" />
     <MESSAGE value="Делаю Дашборд" />
-    <option name="LAST_COMMIT_MESSAGE" value="Делаю Дашборд" />
+    <MESSAGE value="Через запятую" />
+    <option name="LAST_COMMIT_MESSAGE" value="Через запятую" />
   </component>
 </project>
