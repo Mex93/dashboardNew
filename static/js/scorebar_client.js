@@ -24,12 +24,11 @@ function getdata()
         let checked_data = 0;
 
         let line_id = document.getElementById('line_id').textContent;
-        let time_gmt = document.getElementById('time_gmt').textContent;
 //        console.log(line_id)
 //        console.log(country_id)
 
         //var json_text = '{ "line_id": "{{ line_id }}","panel": "scoreboard"}';
-        let json_text = '{"cline_id": "'+ line_id +'", "ctime_gmt": "'+ time_gmt +'"}';
+        let json_text = '{"cline_id": "'+ line_id +'"}';
         let completed_json = jQuery.parseJSON(json_text);
 
         $.getJSON('/engine_scripts/py/launch_scripts/scoreboard_get_stats.py', completed_json, function (data)
@@ -101,7 +100,6 @@ Date.prototype.getUTCTime = function()
 };
 $(document).ready(function() {
 
-    let gmt = +document.getElementById('time_gmt').textContent;
 	document.title = 'Статистика Цех: ~';
 	 $("#name").text('-');
 	 $("#shift_plan").text('-');

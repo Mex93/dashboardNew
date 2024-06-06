@@ -1,5 +1,3 @@
-
-
 from scoreboard.enum_defines import LINE_ID, JOB_TIME, JOB_BREAK_ARRAY_DATA
 from scoreboard.common import CCommon
 from sql.enum_defines import CONNECT_DB_TYPE, TIME_ZONES
@@ -13,9 +11,9 @@ from log.Clog import Clog
 
 
 class CData:
-    def __init__(self, time_zone: TIME_ZONES, line_id: LINE_ID):
+    def __init__(self, line_id: LINE_ID):
 
-        self.current_time_zone = time_zone  # Название страны
+        self.current_time_zone = None  # Название страны
         self.last_change_data = None  # Дата обновления последняя
         self.total_day_plane = 0  # Дневной план
         self.current_line_id = line_id  # Текущая линия
@@ -34,16 +32,55 @@ class CData:
         self.start_job_night = "20:00"
         self.end_job_night = "08:00"
 
+    @staticmethod
+    def get_lines_info():
+        local_sql = CSqlAgent(TIME_ZONES.RUSSIA)
+        try:
+            result = local_sql.connect_to_db(CONNECT_DB_TYPE.LOCAL, TIME_ZONES.RUSSIA)
+            sql_handle = local_sql.get_sql_handle()
+            Clog.lprint(f"Подключение к БД(CData -> get_lines_info): CONNECT_DB_TYPE.LOCAL [sql_handle: {sql_handle}]")
+            if result:
+                query_string = (f"SELECT line_id, gmt "
+                                f"FROM {SQL_TABLE_NAME.local_db_plan_table} "
+                                f"LIMIT 10")
+
+                result = local_sql.sql_query_and_get_result(
+                    sql_handle, query_string, (), "_1", )  # Запрос типа аасоциативного массива
+                if result is False:  # Errorrrrrrrrrrrrr based data
+                    return False
+
+                line_list = list()
+                for item in result:
+                    line_id = item.get("line_id", None)
+                    gmt = item.get("gmt", None)
+                    if line_id is not None and gmt is not None:
+                        line_list.append([line_id, CData.get_gmt_type_from_str(gmt)])
+                return line_list
+        except:
+            return \
+            [
+                [1, TIME_ZONES.RUSSIA],
+                [2, TIME_ZONES.RUSSIA],
+                [3, TIME_ZONES.RUSSIA],
+                [4, TIME_ZONES.RUSSIA],
+                [5, TIME_ZONES.RUSSIA],
+            ]
+
+        finally:
+            local_sql.disconnect_from_db()
+
     def get_data_for_line(self):
 
         sql_line_id = CCommon.get_line_id_for_sql(self.current_line_id)
         if sql_line_id:
 
-            local_sql = CSqlAgent(self.current_time_zone)
+            local_sql = CSqlAgent(TIME_ZONES.RUSSIA)
             try:
-                result = local_sql.connect_to_db(CONNECT_DB_TYPE.LOCAL, self.current_time_zone)
+                result = local_sql.connect_to_db(CONNECT_DB_TYPE.LOCAL,
+                                                 TIME_ZONES.RUSSIA)  # не важно так как потом система помнит TIME_ZONES
                 sql_handle = local_sql.get_sql_handle()
-                Clog.lprint(f"Подключение к БД(CData -> get_data_for_line): CONNECT_DB_TYPE.LOCAL [sql_handle: {sql_handle}]")
+                Clog.lprint \
+                    (f"Подключение к БД(CData -> get_data_for_line): CONNECT_DB_TYPE.LOCAL [sql_handle: {sql_handle}]")
                 if result:
                     query_string = (f"SELECT * "
                                     f"FROM {SQL_TABLE_NAME.local_db_plan_table} "
@@ -59,6 +96,8 @@ class CData:
                     sql_line_check = result[0].get(PLAN_TABLE_FIELDS.fd_line_id, None)
                     if sql_line_check is None:
                         return False
+
+                    line_gmt = result[0].get(PLAN_TABLE_FIELDS.fd_gmt_line, None)
 
                     self.last_change_data = result[0].get(PLAN_TABLE_FIELDS.fd_change_date, None)
                     self.total_day_plane = result[0].get(PLAN_TABLE_FIELDS.fd_plan_current, 1200)
@@ -100,6 +139,7 @@ class CData:
                     self.current_job_time_type = result[0].get(PLAN_TABLE_FIELDS.fd_smena_start_job_type, None)
 
                     check_list = (
+                        line_gmt,
                         # старт смены и конец - строка
                         self.job_day_delay,
                         self.start_job_day,
@@ -184,6 +224,7 @@ class CData:
                             (BREAK_TYPE.DOUBLE, break_night_double_len * 60, break_night_double_start),
                         )
 
+                    self.current_time_zone = self.get_gmt_type_from_str(line_gmt)  # Для получения типа
                     Clog.lprint(f"CData -> get_data_for_line ->  Данные получены! ({check_list})")
                     return True
 
@@ -202,6 +243,9 @@ class CData:
                 local_sql.disconnect_from_db()
 
         return False
+
+    def get_line_time_zone(self):
+        return self.current_time_zone
 
     def get_break_delay_time(self, br_type: BREAK_TYPE, job_time: JOB_TYPE):
         """
@@ -389,7 +433,7 @@ class CData:
                 # start_date = cdate.strptime(f"{year}/{month}/{day} "
                 #                             f"{CCommon.utc_to_current_zone_time(time_str, "0300")}/00", "%Y/%m/%d %H:%M/%S")
                 start_date = cdate.strptime(f"{year}/{month}/{day} "
-                                             f"{time_str}/00", "%Y/%m/%d %H:%M/%S")
+                                            f"{time_str}/00", "%Y/%m/%d %H:%M/%S")
 
             elif job_time == JOB_TYPE.DAY:
                 # start_date = cdate.strptime(f"{year}/{month}/{day} "
@@ -453,7 +497,7 @@ class CData:
                 BREAK_TYPE.EAT,
                 BREAK_TYPE.DOUBLE,
                 BREAK_TYPE.LAST
-                      ]
+            ]
         elif self.job_day_delay == 9:
             breaks = [
                 BREAK_TYPE.FIRST,
@@ -511,6 +555,24 @@ class CData:
                         last = 0
                     return last
         return False
+
+    @staticmethod
+    def get_gmt_text_to_type(time_zone: TIME_ZONES) -> str:
+        if time_zone == TIME_ZONES.RUSSIA:
+            return "0300"
+        elif time_zone == TIME_ZONES.KZ:
+            return "0500"
+        else:
+            return "0300"
+
+    @staticmethod
+    def get_gmt_type_from_str(gmt_str: str) -> TIME_ZONES:
+        if gmt_str.find("0300") != -1:
+            return TIME_ZONES.RUSSIA
+        elif gmt_str.find("0500") != -1:
+            return TIME_ZONES.KZ
+        else:
+            return TIME_ZONES.RUSSIA
 
 # unit = CData(TIME_ZONES.RUSSIA, LINE_ID.LINE_VRN_ONE)
 # unit.get_data_for_line()

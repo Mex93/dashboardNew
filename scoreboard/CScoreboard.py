@@ -2,7 +2,7 @@ from datetime import timedelta
 
 from scoreboard.enum_defines import JOB_TYPE, JOB_STATUS, LINE_ID, BREAK_TYPE, DATA_SCORE_TYPE, JOB_TIME
 
-from sql.enum_defines import CONNECT_DB_TYPE, TIME_ZONES
+from sql.enum_defines import CONNECT_DB_TYPE
 from sql.CSQL import NotConnectToDB, ErrorSQLQuery, ErrorSQLData
 
 from sql.CSQLAgent import CSqlAgent
@@ -14,9 +14,9 @@ from scoreboard.common import CCommon
 
 
 class CScore:
-    def __init__(self, time_zone: TIME_ZONES, line_id: LINE_ID):
+    def __init__(self, line_id: LINE_ID):
 
-        self.current_time_zone = time_zone
+        self.current_time_zone = None
         self.current_line = line_id
         self.__is_result_stored = False
         # Основное с вывода табло
@@ -50,6 +50,8 @@ class CScore:
 
         self.count_tv_forecast_on_day_css = ""  # Прогноз за день
 
+        self.cdata_unit = None
+
     def get_mins(self):
         return self.get_time()[1]
 
@@ -74,7 +76,8 @@ class CScore:
                 Clog.lprint(
                     f"Подключение к БД(CScore -> get_12hours_data): CONNECT_DB_TYPE.LINE [sql_handle: {sql_handle}]")
                 if result:
-                    time_zone_str = CCommon.get_time_zone_str_from_country_time_zone(self.current_time_zone)
+
+                    time_zone_str = cdata_unit.get_gmt_text_to_type(self.current_time_zone)
                     cdate = CCommon.get_current_time(self.current_time_zone)
                     #
                     day = cdate.day
@@ -140,7 +143,7 @@ class CScore:
                 global_sql.disconnect_from_db()
         return False
 
-    def get_hours_score(self, score_type: DATA_SCORE_TYPE, break_params: list):
+    def get_hours_score(self, cdata_unit: CData, score_type: DATA_SCORE_TYPE, break_params: list):
         sql_line_id = CCommon.get_line_id_for_sql(self.current_line)
         if sql_line_id:
 
@@ -151,7 +154,8 @@ class CScore:
                 Clog.lprint(
                     f"Подключение к БД(CScore -> get_hours_score): CONNECT_DB_TYPE.LINE [sql_handle: {sql_handle}]")
                 if result:
-                    time_zone_str = CCommon.get_time_zone_str_from_country_time_zone(self.current_time_zone)
+
+                    time_zone_str = cdata_unit.get_gmt_text_to_type(self.current_time_zone)
                     cdate = CCommon.get_current_time(self.current_time_zone)
 
                     seconds = cdate.second
@@ -261,7 +265,7 @@ class CScore:
                     f"Подключение к БД(CScore -> get_end_job_score): CONNECT_DB_TYPE.LINE [sql_handle: {sql_handle}]")
                 if result:
 
-                    time_zone_str = CCommon.get_time_zone_str_from_country_time_zone(self.current_time_zone)
+                    time_zone_str = cdata_unit.get_gmt_text_to_type(self.current_time_zone)
                     cdate = CCommon.get_current_time(self.current_time_zone)
                     #
                     day = cdate.day
@@ -293,7 +297,6 @@ class CScore:
                     if start_date is not None:
                         if ((job_time == JOB_TYPE.DAY and not CCommon.is_current_day_time(self.current_time_zone)) or
                                 (job_time == JOB_TYPE.NIGHT and CCommon.is_current_day_time(self.current_time_zone))):
-
                             start_date = start_date - timedelta(days=1)
                             mins_correct = start_date.minute
                             hours_correct = start_date.hour
@@ -360,8 +363,12 @@ class CScore:
             return
 
         # cdata
-        data_unit = CData(self.current_time_zone, self.current_line)
+        data_unit = CData(self.current_line)
+        self.cdata_unit = data_unit
+
         if data_unit.get_data_for_line() is True:
+
+            self.current_time_zone = data_unit.get_line_time_zone()
 
             current_job_time = data_unit.get_job_time_type()
             self.current_job_time = current_job_time
@@ -372,7 +379,7 @@ class CScore:
 
             self.total_day_plan = data_unit.get_day_total_plane()  # Дневной план
 
-            if self.get_hours_score(DATA_SCORE_TYPE.ONE_HOUR_DATA, break_list) is True:
+            if self.get_hours_score(data_unit, DATA_SCORE_TYPE.ONE_HOUR_DATA, break_list) is True:
                 current_unix_time = int(CCommon.get_current_time(self.current_time_zone).timestamp())
                 unix_time_job_end = data_unit.get_job_time_unix_time(JOB_TIME.END, current_job_time)
 
@@ -417,8 +424,8 @@ class CScore:
                         self.current_job_status == JOB_STATUS.JOB_BREAK):
 
                     if self.__get_12hours_data(data_unit) is True:
-                        if self.get_hours_score(DATA_SCORE_TYPE.ONE_HOUR_DATA, break_list) is True:
-                            if self.get_hours_score(DATA_SCORE_TYPE.FIVE_MINS_DATA, break_list) is True:
+                        if self.get_hours_score(data_unit, DATA_SCORE_TYPE.ONE_HOUR_DATA, break_list) is True:
+                            if self.get_hours_score(data_unit, DATA_SCORE_TYPE.FIVE_MINS_DATA, break_list) is True:
 
                                 is_break = False
 
@@ -445,7 +452,8 @@ class CScore:
                                 # Компенсация времени перерыва если он начат
 
                                 if is_break is True:
-                                    compensace_sec_current_break = data_unit.get_break_last_time(self.job_break_type, current_job_time)
+                                    compensace_sec_current_break = data_unit.get_break_last_time(self.job_break_type,
+                                                                                                 current_job_time)
                                 else:
                                     compensace_sec_current_break = 0
 
@@ -456,7 +464,8 @@ class CScore:
                                 else:
                                     # print(start_to_now_compensace, compensace_sec_current_break)
                                     self.assembled_device_speed = int(
-                                        self.assembled_device / ((start_to_now_compensace + compensace_sec_current_break) / 3600))
+                                        self.assembled_device / (
+                                                    (start_to_now_compensace + compensace_sec_current_break) / 3600))
 
                                 # Прогноз за день
                                 hour_nte = now_to_end_compensace / 3600  # Количетво часов из оставшегося времени до конца смены
@@ -472,7 +481,6 @@ class CScore:
                     # TODO Блок показа общего плана за смену
 
                     if self.get_end_job_score(data_unit) is True:
-
                         # расчёт цветов для фронтенда
                         self.get_speed_ticks(data_unit)
                         self.__is_result_stored = True
@@ -560,7 +568,6 @@ class CScore:
                         all_job_time_sec / 3600))  # int(count_tv_forecast_on_day / (all_job_time_mins / 60))
 
             self.total_day_plan_speed = count_tv_average_ph_for_plan
-            print(count_tv_average_ph_for_plan)
 
             # ------------------ Получение css относительно количества
             self.count_tv_on_5min_css = "-"  # Скорость за 5 минут
@@ -578,6 +585,10 @@ class CScore:
             self.assembled_speed_for_last_one_hour = 0
 
             self.count_tv_forecast_on_day_css = "-"
+
+    def get_cdata_unit(self):
+
+        return self.cdata_unit
 
     def get_ceh_name(self):
         if self.current_line == LINE_ID.LINE_KZ_ONE:

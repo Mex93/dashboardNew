@@ -51,6 +51,8 @@ class PLAN_TABLE_FIELDS:
     fd_mena_start_job_date_stamp = "smena_start_job_date"
     fd_smena_start_job_type = "job_time_type"
 
+    fd_gmt_line = "gmt"
+
 
 class ASSEMBLED_TABLE_FIELDS:
     fd_assy_id = "assy_id"

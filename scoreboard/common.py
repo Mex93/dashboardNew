@@ -85,13 +85,6 @@ class CCommon:
             return sec / 60
 
     @staticmethod
-    def get_time_zone_str_from_country_time_zone(time_zone: TIME_ZONES):
-        if time_zone == TIME_ZONES.RUSSIA:
-            return "0300"  # "0300"
-        else:
-            return "0500"  # 0500
-
-    @staticmethod
     def estimate(value: int, opt: int) -> str:
         # $value = intval($value); $opt = intval($opt);
 
@@ -160,25 +153,3 @@ class CCommon:
     @staticmethod
     def get_random(max_value: int) -> int:
         return randint(1, max_value)
-
-    @staticmethod
-    def time_to_utc(time_str: str):
-        if time_str.find(":") == -1:
-            raise ValueError(f"Ошибка даты {time_str}!")
-
-        time = datetime.strptime(time_str, "%H:%M")
-        utc_time = time - timedelta(hours=3)
-        return utc_time.strftime("%H:%M")
-
-    @staticmethod
-    def utc_to_current_zone_time(time_str: str, current_time_zone: str):
-        if time_str.find(":") == -1:
-            raise ValueError(f"Ошибка даты {time_str}!")
-
-        time = datetime.strptime(time_str, "%H:%M")
-        utc_time = None
-        if current_time_zone == "0300":
-            utc_time = time + timedelta(hours=3)
-        elif current_time_zone == "0500":
-            utc_time = time + timedelta(hours=5)
-        return utc_time.strftime("%H:%M")

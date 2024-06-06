@@ -3,7 +3,7 @@ from datetime import timedelta
 # Приём json запроса
 
 from sql.CSQLAgent import CSqlAgent
-from sql.enum_defines import TIME_ZONES, CONNECT_DB_TYPE
+from sql.enum_defines import CONNECT_DB_TYPE
 
 from sql.sql_data import SQL_TABLE_NAME
 from sql.sql_data import ASSEMBLED_TABLE_FIELDS
@@ -19,17 +19,19 @@ from log.Clog import Clog
 # Подключение к бд
 
 class CDashboard:
-    def __init__(self, time_zone: TIME_ZONES, line_id: LINE_ID):
-        self.current_time_zone = time_zone
+    def __init__(self, line_id: LINE_ID):
+        self.current_time_zone = None
         self.current_line = line_id
 
     def load_plan_settings(self) -> tuple | bool:
 
-        plan_unit = CData(self.current_time_zone, self.current_line)
+        plan_unit = CData(self.current_line)
 
         result = plan_unit.get_data_for_line()
         if result is False:
             return False
+
+        self.current_time_zone = plan_unit.get_line_time_zone()
 
         result_arr = self.get_points(plan_unit)
         if result_arr is False:
@@ -229,7 +231,7 @@ class CDashboard:
         restup = (count_in_hour,
                   result_time_dict_5mins,
                   plan_unit.get_day_total_plane(),
-                  plan_unit.get_day_plane_total_speed_for_hour(job_time, plan_unit.job_day_delay)
+                  int(plan_unit.get_day_plane_total_speed_for_hour(job_time, plan_unit.job_day_delay))
                   )
 
         return restup
@@ -246,7 +248,8 @@ class CDashboard:
                     f"Подключение к БД(CDashboard -> get_points): CONNECT_DB_TYPE.LINE [sql_handle: {sql_handle}]")
 
                 if result:
-                    time_zone_str = CCommon.get_time_zone_str_from_country_time_zone(self.current_time_zone)
+
+                    time_zone_str = cdata_unit.get_gmt_text_to_type(self.current_time_zone)
                     cdate = CCommon.get_current_time(self.current_time_zone)
                     #
                     day = cdate.day

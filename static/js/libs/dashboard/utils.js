@@ -47,15 +47,14 @@ function GetAnyResultIn(findParam, arr)
 
 function GetJobTypeArr(arr_night, arr_day, current_arr)
 {
-    let arr = Array.from(current_arr.keys());  // получим ключи в массив
     //console.log(arr);
-    for(let i = 0; i < arr.length; i++)
+    for(let i = 0; i < current_arr.length; i++)
     {
-        if(arr_night.indexOf(arr[i]) !== -1)
+        if(arr_night.indexOf(current_arr[0][i]) !== -1)
         {
             return arr_night;
         }
-        else if(arr_day.indexOf(arr[i]) !== -1)
+        else if(arr_day.indexOf(current_arr[0][i]) !== -1)
         {
             return arr_day;
         }
@@ -72,8 +71,9 @@ function GetStandartFMinsAssocArr(current_arr, end_lenght)
         mins_array[i] = `${5 * i}`.padStart(2, '0')
     }
     const list_hour_night = ["20", "21", "22", "23", "00", "01", "02", "03", "04", "05", "06", "07"];
-    const list_hour_day = ["08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19"]
+    const list_hour_day = ["08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19"];
     let currentJobHoursArr = GetJobTypeArr(list_hour_night, list_hour_day, current_arr);
+
     if(currentJobHoursArr !== JOB_DAY_TYPE.TYPE_NONE)
     {
         let buff_arr = new Map();

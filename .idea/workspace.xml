@@ -7,9 +7,19 @@
     <list default="true" id="0763ca10-79a3-416a-88f1-f9ae49a0d658" name="Changes" comment="Делаю Дашборд">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/app.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scoreboard/CDashboard.py" beforeDir="false" afterPath="$PROJECT_DIR$/scoreboard/CDashboard.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scoreboard/CData.py" beforeDir="false" afterPath="$PROJECT_DIR$/scoreboard/CData.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scoreboard/CScoreboard.py" beforeDir="false" afterPath="$PROJECT_DIR$/scoreboard/CScoreboard.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scoreboard/common.py" beforeDir="false" afterPath="$PROJECT_DIR$/scoreboard/common.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/sql/CSQLAgent.py" beforeDir="false" afterPath="$PROJECT_DIR$/sql/CSQLAgent.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/sql/sql_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/sql/sql_data.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/static/js/dashboard_client.js" beforeDir="false" afterPath="$PROJECT_DIR$/static/js/dashboard_client.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/static/js/libs/dashboard/utils.js" beforeDir="false" afterPath="$PROJECT_DIR$/static/js/libs/dashboard/utils.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/static/js/scorebar_client.js" beforeDir="false" afterPath="$PROJECT_DIR$/static/js/scorebar_client.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/templates/dashboard_all.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/dashboard_all.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/dashboard_kz.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/dashboard_kz.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/dashboard_kz.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/dashboard_vrn.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/scoreboard.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/scoreboard.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -60,7 +70,7 @@
     &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
     &quot;git-widget-placeholder&quot;: &quot;master&quot;,
     &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/Ryazanov/PycharmProjects/dashboardNew/static/js&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/Ryazanov/PycharmProjects/dashboardNew&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
     &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
     &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
@@ -169,6 +179,7 @@
       <workItem from="1714981068606" duration="1815000" />
       <workItem from="1716207910776" duration="11119000" />
       <workItem from="1717144204294" duration="13066000" />
+      <workItem from="1717652703892" duration="3560000" />
     </task>
     <task id="LOCAL-00001" summary="first">
       <option name="closed" value="true" />
@@ -322,7 +333,15 @@
       <option name="project" value="LOCAL" />
       <updated>1716381114614</updated>
     </task>
-    <option name="localTasksCounter" value="20" />
+    <task id="LOCAL-00020" summary="Делаю Дашборд">
+      <option name="closed" value="true" />
+      <created>1717162531097</created>
+      <option name="number" value="00020" />
+      <option name="presentableId" value="LOCAL-00020" />
+      <option name="project" value="LOCAL" />
+      <updated>1717162531097</updated>
+    </task>
+    <option name="localTasksCounter" value="21" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">

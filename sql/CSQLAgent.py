@@ -1,4 +1,4 @@
-from sql.CSQL import csql_eng, ErrorSQLData, ErrorSQLQuery, NotConnectToDB
+from sql.CSQL import csql_eng, ErrorSQLData, NotConnectToDB
 import sql.enum_defines as cenum
 from sql.config import db_standart_connect_params, db_assembly_connect_params_kz, db_assembly_connect_params_vrn
 from sql.enum_defines import TIME_ZONES
