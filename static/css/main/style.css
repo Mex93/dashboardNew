@@ -125,7 +125,6 @@ display: grid;
 	border-radius: 43px;
     /*margin: 0 auto;*/
     width: 60%;
-    height: 60%;
     text-align: center;
 }
 .reload_dialog.text {
@@ -135,5 +134,4 @@ display: grid;
     position: center;
     padding: 20px 20px 20px 20px;
     font-size: 1vw;
-	height: 30%;
 }

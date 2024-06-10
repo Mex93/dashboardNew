@@ -4,11 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="0763ca10-79a3-416a-88f1-f9ae49a0d658" name="Changes" comment="Через запятую">
+    <list default="true" id="0763ca10-79a3-416a-88f1-f9ae49a0d658" name="Changes" comment="Через запятую, и исправил css полоску в скорбаре">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/app.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scoreboard/common.py" beforeDir="false" afterPath="$PROJECT_DIR$/scoreboard/common.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scoreboard/enum_defines.py" beforeDir="false" afterPath="$PROJECT_DIR$/scoreboard/enum_defines.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/static/css/main/style.css" beforeDir="false" afterPath="$PROJECT_DIR$/static/css/main/style.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/static/css/scoreboard/tv.css" beforeDir="false" afterPath="$PROJECT_DIR$/static/css/scoreboard/tv.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/static/js/dashboard_client.js" beforeDir="false" afterPath="$PROJECT_DIR$/static/js/dashboard_client.js" afterDir="false" />
     </list>
@@ -148,6 +146,11 @@
       </runOnlyEnvs>
       <method v="2" />
     </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Python.app" />
+      </list>
+    </recent_temporary>
   </component>
   <component name="SharedIndexes">
     <attachedChunks>
@@ -341,7 +344,15 @@
       <option name="project" value="LOCAL" />
       <updated>1717663168816</updated>
     </task>
-    <option name="localTasksCounter" value="22" />
+    <task id="LOCAL-00022" summary="Через запятую, и исправил css полоску в скорбаре">
+      <option name="closed" value="true" />
+      <created>1717679372920</created>
+      <option name="number" value="00022" />
+      <option name="presentableId" value="LOCAL-00022" />
+      <option name="project" value="LOCAL" />
+      <updated>1717679372920</updated>
+    </task>
+    <option name="localTasksCounter" value="23" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -365,6 +376,7 @@
     <MESSAGE value="Сделано кеширование и исправление бага с концом смены" />
     <MESSAGE value="Делаю Дашборд" />
     <MESSAGE value="Через запятую" />
-    <option name="LAST_COMMIT_MESSAGE" value="Через запятую" />
+    <MESSAGE value="Через запятую, и исправил css полоску в скорбаре" />
+    <option name="LAST_COMMIT_MESSAGE" value="Через запятую, и исправил css полоску в скорбаре" />
   </component>
 </project>

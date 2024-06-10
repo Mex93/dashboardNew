@@ -16,7 +16,6 @@ body{
 }
 header{
 	background-color: #050c1e;
-	display: block;
 	height: 7vh;
 	display: flex;
 	flex-direction: row;
@@ -46,15 +45,14 @@ header{
 	padding: 0vh 0vw;
 }
 #plan-fact table{
-	width: 100%;
+	width: 100vw;
 	border: none;
 	text-align: left;
-	margin-left: 2%;
+	padding: 2%;
 }
 #plan-fact th{
 	font-size: 3vw;
 }
-
 #plan-fact table td, th{
 	padding: 1.95vh 0.2vw;	
 }

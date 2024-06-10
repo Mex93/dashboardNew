@@ -569,6 +569,14 @@ function resizeGraph()
 
         // Показываем
         mainDIV.style.display = "block"
+        document.getElementById('getdate_dialog').style.display = 'none';
+
+    }
+    else
+    {
+        document.getElementById('getdate_dialog').style.display = 'none';
+        document.getElementById('reload_dialog').style.display = 'block';
+        setTimeout(ReloadPageFunc, 120_000);  // ~  2 минуты и релоад
     }
 
 }
@@ -943,6 +951,7 @@ $(document).ready(function()
     let lines = document.getElementById('lines_selected').textContent;
     lines_selected = lines.split(",")
     //
+    document.getElementById('getdate_dialog').style.display = 'block';
 
     mainDIV = document.createElement("div")
     mainDIV.id = 'main_div'
@@ -951,5 +960,6 @@ $(document).ready(function()
     setTimeout(ReloadPageFunc, 2_800_000);  // ~ 50 min
     setInterval(UpdateFunc, 20000);
     setTimeout(resizeGraph, 3000);
+
     mainDIV.style.display = "none"
 }); // document ready
